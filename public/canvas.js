@@ -1,41 +1,59 @@
-// Create a pattern, offscreen
-const patternCanvas = document.createElement('canvas');
-const patternContext = patternCanvas.getContext('2d');
-
-// Give the pattern a width and height of 50
-patternCanvas.width = 50;
-patternCanvas.height = 50;
-
-// Give the pattern a background color and draw an arc
-patternContext.fillStyle = 'black';
-patternContext.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
-patternContext.strokeStyle = 'green'
-patternContext.arc(0, 0, 50, 0, .5 * Math.PI);
-patternContext.stroke();
-
-// Create our primary canvas and fill it with the pattern
-const canvas = document.createElement('canvas');
-var ctx = canvas.getContext("2d");
-
-canvas.width  = window.innerWidth;
-canvas.height = window.innerHeight;
-canvas.style = "position: absolute;top: 0;z-index:-1;"
-
-const pattern = ctx.createPattern(patternCanvas, 'repeat');
-ctx.fillStyle = pattern;
-ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-
-
-// Add our primary canvas to the webpage
-document.body.appendChild(canvas);
-
-
-// Create gradient
-//var grd = ctx.createLinearGradient(0, 0, 200, 0);
-//grd.addColorStop(0, "red");
-//grd.addColorStop(1, "white");
-
-// Fill with gradient
-// ctx.fillStyle = grd;
-// ctx.fillRect(10, 10, 150, 80);
+$(document).ready(function() {
+  var canvas = $('#canvas')[0];
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  if(canvas.getContext) {
+    var ctx = canvas.getContext('2d');
+    var w = canvas.width;
+    var h = canvas.height;
+    ctx.strokeStyle = 'rgba(174,194,224,0.5)';
+    ctx.lineWidth = 1;
+    ctx.lineCap = 'round';
+    
+    
+    var init = [];
+    var maxParts = 1000;
+    for(var a = 0; a < maxParts; a++) {
+      init.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        l: Math.random() * 1,
+        xs: -4 + Math.random() * 4 + 2,
+        ys: Math.random() * 10 + 10
+      })
+    }
+    
+    var particles = [];
+    for(var b = 0; b < maxParts; b++) {
+      particles[b] = init[b];
+    }
+    
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+      for(var c = 0; c < particles.length; c++) {
+        var p = particles[c];
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x + p.l * p.xs, p.y + p.l * p.ys);
+        ctx.stroke();
+      }
+      move();
+    }
+    
+    function move() {
+      for(var b = 0; b < particles.length; b++) {
+        var p = particles[b];
+        p.x += p.xs;
+        p.y += p.ys;
+        if(p.x > w || p.y > h) {
+          p.x = Math.random() * w;
+          p.y = -20;
+        }
+      }
+    }
+    
+    setInterval(draw, 30);
+    
+  }
+});

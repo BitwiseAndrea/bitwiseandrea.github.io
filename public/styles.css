@@ -2,6 +2,10 @@ html {
     background: black
 }
 
+canvas {
+    position: absolute;
+}
+
 body {
     margin: 0
 }
