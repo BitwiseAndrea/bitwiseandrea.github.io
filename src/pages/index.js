@@ -12,21 +12,14 @@ const upperSectionStyles = {
   borderRadius: '8px',
   padding: '16px',
   margin: '36px',
-  background: 'linear-gradient(180deg, #ceaf67, #54c09f)'
+  background: 'linear-gradient(rgb(206 175 103 / 80%), rgb(84 192 159 / 80%))'
 }
 
 const gridStyles = {
   display: 'grid',
   gridTemplate: 'auto / auto auto auto'
 }
-const headingStyles = {
-  marginTop: 0,
-  marginBottom: 64,
-  maxWidth: 320,
-}
-const headingAccentStyles = {
-  color: "#663399",
-}
+
 const paragraphStyles = {
   marginBottom: 48,
 }
@@ -50,7 +43,17 @@ const footerStyles = {
   backgroundImage: 'url(' + AndreaPhoto + ')',
   backgroundSize: 'contain',
   width: '100%',
-  paddingTop: '67%'
+  paddingTop: '67%',
+  position: 'relative'
+}
+
+const footerMaskStyles = {
+  width: '100%',
+  height: '100%',
+  position: 'absolute',
+  height: '25%',
+  top: 0,
+  background: 'linear-gradient(0, transparent, black)'
 }
 
 const linkStyle = {
@@ -72,7 +75,7 @@ const links = [
     description:
       "A great place to get started if you're new to web development. Designed to guide you through setting up your first Gatsby site.",
 
-      background: 'linear-gradient(180deg, rgb(223 76 255 / 52%), #5863d4)'
+      background: 'linear-gradient(180deg, rgb(223 76 255 / 80%), #5863d4)'
   },
   {
     text: "How to Guides",
@@ -80,7 +83,7 @@ const links = [
     description:
       "Practical step-by-step guides to help you achieve a specific goal. Most useful when you're trying to get something done.",
 
-      background: 'linear-gradient(180deg, rgb(223 76 255 / 52%), #5863d4)'
+      background: 'linear-gradient(180deg, rgb(223 76 255 / 80%), #5863d4)'
   },
   {
     text: "Reference Guides",
@@ -88,7 +91,7 @@ const links = [
     description:
       "Nitty-gritty technical descriptions of how Gatsby works. Most useful when you need detailed information about Gatsby's APIs.",
 
-      background: 'linear-gradient(180deg, rgb(223 76 255 / 52%), #5863d4)'
+      background: 'linear-gradient(180deg, rgb(223 76 255 / 80%), #5863d4)'
   },
   {
     text: "Conceptual Guides",
@@ -96,7 +99,7 @@ const links = [
     description:
       "Big-picture explanations of higher-level Gatsby concepts. Most useful for building understanding of a particular topic.",
 
-      background: 'linear-gradient(180deg, rgb(223 76 255 / 52%), #5863d4)'
+      background: 'linear-gradient(180deg, rgb(223 76 255 / 80%), #5863d4)'
   },
   {
     text: "Plugin Library",
@@ -104,7 +107,7 @@ const links = [
     description:
       "Add functionality and customize your Gatsby site or app with thousands of plugins built by our amazing developer community.",
 
-      background: 'linear-gradient(180deg, rgb(223 76 255 / 52%), #5863d4)'
+      background: 'linear-gradient(180deg, rgb(223 76 255 / 80%), #5863d4)'
   },
   {
     text: "Plugin Nothingness",
@@ -112,7 +115,7 @@ const links = [
     description:
       "Add functionality and customize your Gatsby site or app with thousands of plugins built by our amazing developer community.",
 
-      background: 'linear-gradient(180deg, rgb(223 76 255 / 52%), #5863d4)'
+      background: 'linear-gradient(180deg, rgb(223 76 255 / 80%), #5863d4)'
   }
 ]
 
@@ -147,7 +150,9 @@ const IndexPage = () => {
           ))}
       </div>
 
-      <div style={footerStyles} />
+      <div style={footerStyles}>
+        <div style={footerMaskStyles} />
+      </div>
     </main>
   )
 }
