@@ -1,11 +1,25 @@
 import * as React from "react"
+import AndreaPhoto from "../images/IMG_4389.jpg"
 
 // styles
 const pageStyles = {
-  color: "#232129",
-  padding: "96px",
-  fontFamily: "-apple-system, Roboto, sans-serif, serif",
+  fontFamily: "-apple-system, fantasy",
 }
+
+const upperSectionStyles = {
+  borderRadius: '8px',
+  padding: '16px',
+  margin: '36px',
+  background: 'linear-gradient(180deg, #ceaf67, #54c09f)'
+}
+
+const sectionStyles = {
+  borderRadius: '8px',
+  padding: '16px',
+  margin: '36px',
+  background: 'linear-gradient(180deg, rgb(223 76 255 / 52%), #5863d4)'
+}
+
 const headingStyles = {
   marginTop: 0,
   marginBottom: 64,
@@ -27,11 +41,19 @@ const codeStyles = {
 const listStyles = {
   marginBottom: 96,
   paddingLeft: 0,
+  listStyle: 'none'
 }
 const listItemStyles = {
   fontWeight: "300",
   fontSize: "24px",
   maxWidth: "560px",
+}
+
+const footerStyles = {
+  backgroundImage: 'url(' + AndreaPhoto + ')',
+  backgroundSize: 'contain',
+  width: '100%',
+  paddingTop: '67%'
 }
 
 const linkStyle = {
@@ -109,36 +131,42 @@ const IndexPage = () => {
           🎉🎉🎉
         </span>
       </h1>
-      <p style={paragraphStyles}>
-        Edit <code style={codeStyles}>src/pages/index.js</code> to see this page
-        update in real-time.{" "}
-        <span role="img" aria-label="Sunglasses smiley emoji">
-          😎
-        </span>
-      </p>
-      <ul style={listStyles}>
-        <li style={docLinkStyle}>
-          <a
-            style={linkStyle}
-            href={`${docLink.url}?utm_source=starter&utm_medium=start-page&utm_campaign=minimal-starter`}
-          >
-            {docLink.text}
-          </a>
-        </li>
-        {links.map(link => (
-          <li style={{ ...listItemStyles, color: link.color }}>
-            <span>
-              <a
-                style={linkStyle}
-                href={`${link.url}?utm_source=starter&utm_medium=start-page&utm_campaign=minimal-starter`}
-              >
-                {link.text}
-              </a>
-              <p style={descriptionStyle}>{link.description}</p>
-            </span>
+      <div style={upperSectionStyles}>
+        <p style={paragraphStyles}>
+          Edit <code style={codeStyles}>src/pages/index.js</code> to see this page
+          update in real-time.{" "}
+          <span role="img" aria-label="Sunglasses smiley emoji">
+            😎
+          </span>
+        </p>
+      </div>
+
+      <div style={sectionStyles}>
+        <ul style={listStyles}>
+          <li style={docLinkStyle}>
+            <a
+              style={linkStyle}
+              href={`${docLink.url}?utm_source=starter&utm_medium=start-page&utm_campaign=minimal-starter`}
+            >
+              {docLink.text}
+            </a>
           </li>
-        ))}
-      </ul>
+          {links.map(link => (
+            <li style={{ ...listItemStyles, color: link.color }}>
+              <span>
+                <a
+                  style={linkStyle}
+                  href={`${link.url}?utm_source=starter&utm_medium=start-page&utm_campaign=minimal-starter`}
+                >
+                  {link.text}
+                </a>
+                <p style={descriptionStyle}>{link.description}</p>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div style={footerStyles} />
     </main>
   )
 }
