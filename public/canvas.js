@@ -1,8 +1,10 @@
-$(document).ready(function() {
+let rainInterval;
+
+function makeItRain() {
   var canvas = $('#canvas')[0];
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  
+
   if(canvas.getContext) {
     var ctx = canvas.getContext('2d');
     var w = canvas.width;
@@ -53,7 +55,19 @@ $(document).ready(function() {
       }
     }
     
-    setInterval(draw, 30);
+    rainInterval = setInterval(draw, 30);
     
   }
-});
+}
+
+$(document).ready(function() {makeItRain()});
+
+function windowResize() {
+  var canvas = $('#canvas')[0];
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  clearInterval(rainInterval);
+  makeItRain();
+};
+
+window.addEventListener('resize', windowResize);
