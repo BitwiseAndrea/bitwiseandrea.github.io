@@ -46,8 +46,8 @@ function getQueryParam(key) {
 }
 
 function log() {
-    if (window.console && window.console.log) window.console.log(arguments);
-    log2.apply(null, arguments);
+    // if (window.console && window.console.log) window.console.log(arguments);
+    //log2.apply(null, arguments);
 }
 
 function log2() {

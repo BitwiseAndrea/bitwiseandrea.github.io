@@ -1,50 +1,59 @@
 
 .page {
-  font-family: "-apple-system, fantasy"
+  font-family: monospace;
 }
 
-.header {
-  position: relative;
-  padding-bottom: 30px;
-  height: 3000px;
+.container {
+  padding-bottom: 100px;
+    position: relative;
 }
 
-.upperSection {
+.section {
   border-radius: 8px;
   padding: 16px;
-  margin: 36px;
-  background: linear-gradient(0, rgb(206 175 103), rgb(84 192 159));
+  margin: 16px;
   opacity: 60%;
   transition: opacity 0.5s ease;
 }
 
-.upperSection:hover {
+.section:hover {
   opacity: 90%;
   transition: opacity 0.5s ease;
+}
+
+.title {
+  text-align: center;
+}
+
+.headerSection {
+  background: linear-gradient(0,rgb(200, 200, 200), rgb(255, 255, 255));
+}
+
+.skySection {
+  background: linear-gradient(0, rgb(0, 203, 249), rgb(179, 225, 255));
+}
+
+.sunSection {
+  background: linear-gradient(0, #5863d4, rgb(223, 76, 255));
+}
+
+.leavesSection {
+  background: linear-gradient(0, rgb(84, 192, 159), rgb(206, 175, 103));
+}
+
+.thunderSection {
+  background: linear-gradient(0, rgb(24, 0, 46), rgb(18, 0, 82));
+  color: white;
+}
+
+.darkSection {
+  background: linear-gradient(0, rgb(0, 0, 0), rgb(0, 1, 32));
+  color: white;
 }
 
 .grid {
   display: grid;
   grid-template: auto / auto auto auto
-}
-
-.paragraph {
-  margin-bottom: 48;
-}
-
-.listItem {
-  font-weight: 600;
-  font-size: 24px;
-  border-radius: 8px;
-  padding: 16px;
-  margin: 36px;
-  opacity: 60%;
-  transition: opacity 0.5s ease;
-}
-
-.listItem:hover {
-    opacity: 90%;
-    transition: opacity 0.5s ease;
 }
 
 .footer {
