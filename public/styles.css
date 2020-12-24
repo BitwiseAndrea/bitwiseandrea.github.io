@@ -1,9 +1,10 @@
 html {
-    background: white;
+    background: rgb(174, 194, 224);
 }
 
 canvas {
     position: fixed;
+    top: 0;
 }
 
 body {

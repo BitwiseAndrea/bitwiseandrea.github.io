@@ -5,9 +5,9 @@ $(document).ready(function() {
   let ticking = false;
 
   function doSomething(scroll_pos) {
-    var scrollTop = $(window).scrollTop();
     var elementOffset = $('.footer').offset().top;
-    html.style.backgroundColor = `rgba(0, 0, 0, ${scroll_pos / elementOffset})`;
+    var percentage = scroll_pos / elementOffset;
+    html.style.backgroundColor = `rgb(${174 - (174 * percentage)}, ${194 - (194 * percentage)}, ${224 - (224 * percentage)})`;
   }
 
   document.addEventListener('scroll', function(e) {
@@ -22,4 +22,5 @@ $(document).ready(function() {
       ticking = true;
     }
   });
+
 });
