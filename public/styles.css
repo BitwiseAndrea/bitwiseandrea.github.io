@@ -1,9 +1,9 @@
 html {
-    background: black;
+    background: white;
 }
 
 canvas {
-    position: absolute;
+    position: fixed;
 }
 
 body {

@@ -5,7 +5,8 @@
 
 .header {
   position: relative;
-  padding-bottom: 30px
+  padding-bottom: 30px;
+  height: 3000px;
 }
 
 .upperSection {
