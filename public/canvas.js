@@ -10,7 +10,7 @@ function makeItRain() {
     var w = canvas.width;
     var h = canvas.height;
     ctx.strokeStyle = 'rgba(174,194,224,0.5)';
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     
     
@@ -21,8 +21,8 @@ function makeItRain() {
         x: Math.random() * w,
         y: Math.random() * h,
         l: Math.random() * 1,
-        xs: -4 + Math.random() * 4 + 2,
-        ys: Math.random() * 10 + 10
+        xs: -2 + Math.random() * 2 + 2,
+        ys: Math.random() * 10 + 20
       })
     }
     
@@ -44,10 +44,12 @@ function makeItRain() {
     }
     
     function move() {
+      var elementOffset = $('.footer').offset().top;
+      var percentage = window.scrollY / elementOffset;
       for(var b = 0; b < particles.length; b++) {
         var p = particles[b];
         p.x += p.xs;
-        p.y += p.ys;
+        p.y += p.ys * percentage;
         if(p.x > w || p.y > h) {
           p.x = Math.random() * w;
           p.y = -20;
