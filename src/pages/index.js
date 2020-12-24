@@ -1,87 +1,5 @@
-import * as React from "react"
-import AndreaPhoto from "../images/IMG_4389.jpg"
-import FernPhoto from "../images/ferns.png"
-
-// styles
-const headerStyles = {
-  position: 'relative',
-  paddingBottom: '30px'
-}
-
-const pageStyles = {
-  fontFamily: "-apple-system, fantasy",
-  // backgroundImage: 'url(' + FernPhoto + ')'
-}
-
-const upperSectionStyles = {
-  borderRadius: '8px',
-  padding: '16px',
-  margin: '36px',
-  background: 'linear-gradient(rgb(206 175 103), rgb(84 192 159))',
-  opacity: '60%'
-}
-
-const gridStyles = {
-  display: 'grid',
-  gridTemplate: 'auto / auto auto auto'
-}
-
-const paragraphStyles = {
-  marginBottom: 48,
-}
-const codeStyles = {
-  color: "#8A6534",
-  padding: 4,
-  backgroundColor: "#FFF4DB",
-  fontSize: "1.25rem",
-  borderRadius: 4,
-}
-
-const listItemStyles = {
-  fontWeight: "600",
-  fontSize: "24px",
-  borderRadius: '8px',
-  padding: '16px',
-  margin: '36px',
-  opacity: '60%'
-}
-
-const footerStyles = {
-  backgroundImage: 'url(' + AndreaPhoto + ')',
-  backgroundSize: 'contain',
-  width: '100%',
-  paddingTop: '67%',
-  position: 'relative'
-}
-
-const footerMaskStyles = {
-  width: '100%',
-  height: '100%',
-  position: 'absolute',
-  height: '25%',
-  top: 0,
-  background: 'linear-gradient(0, transparent, black)'
-}
-
-const headerMaskStyles = {
-  width: '100%',
-  height: '100%',
-  position: 'absolute',
-  height: '10%',
-  bottom: 0,
-  background: 'linear-gradient(0, black, transparent)'
-}
-
-const linkStyle = {
-  color: "#000000",
-  fontWeight: "bold",
-  fontSize: "16px",
-  verticalAlign: "5%",
-}
-
-const descriptionStyle = {
-  fontSize: "14px",
-}
+import * as React from "react";
+import './pageStyles.css';
 
 // data
 const links = [
@@ -138,37 +56,37 @@ const links = [
 // markup
 const IndexPage = () => {
   return (
-    <main style={pageStyles}>
+    <main className='page'>
       <title>Home Page</title>
-      <div style={headerStyles}>
-        <div style={upperSectionStyles}>
-          <p style={paragraphStyles}>
+      <div className='header'>
+        <div className='upperSection'>
+          <p className='paragraph'>
             <span role="img" aria-label="Sunglasses smiley emoji">
               😎
             </span>
           </p>
         </div>
 
-        <div style={gridStyles}>
+        <div className='grid'>
             {links.map(link => (
-              <div key={link.url} style={{ ...listItemStyles, background: link.background }}>
+              <div key={link.url} className='listItem' style={{ background: link.background }}>
                 <span>
                   <a
-                    style={linkStyle}
+                    className='link'
                     href={`${link.url}?utm_source=starter&utm_medium=start-page&utm_campaign=minimal-starter`}
                   >
                     {link.text}
                   </a>
-                  <p style={descriptionStyle}>{link.description}</p>
+                  <p className='description'>{link.description}</p>
                 </span>
               </div>
             ))}
         </div>
-        <div style={headerMaskStyles} />
+        <div className='headerMask' />
       </div>
 
-      <div style={footerStyles}>
-        <div style={footerMaskStyles} />
+      <div className='footer'>
+        <div className='footerMask' />
       </div>
     </main>
   )

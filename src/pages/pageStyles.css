@@ -1,0 +1,84 @@
+
+.page {
+  font-family: "-apple-system, fantasy"
+}
+
+.header {
+  position: relative;
+  padding-bottom: 30px
+}
+
+.upperSection {
+  border-radius: 8px;
+  padding: 16px;
+  margin: 36px;
+  background: linear-gradient(0, rgb(206 175 103), rgb(84 192 159));
+  opacity: 60%;
+  transition: opacity 0.5s ease;
+}
+
+.upperSection:hover {
+  opacity: 90%;
+  transition: opacity 0.5s ease;
+}
+
+.grid {
+  display: grid;
+  grid-template: auto / auto auto auto
+}
+
+.paragraph {
+  margin-bottom: 48;
+}
+
+.listItem {
+  font-weight: "600";
+  font-size: "24px";
+  border-radius: 8px;
+  padding: 16px;
+  margin: 36px;
+  opacity: 60%;
+  transition: opacity 0.5s ease;
+}
+
+.listItem:hover {
+    opacity: 90%;
+    transition: opacity 0.5s ease;
+}
+
+.footer {
+  background-image: url('../images/IMG_4389.jpg');
+  background-size: contain;
+  width: 100%;
+  padding-top: 67%;
+  position: relative;
+}
+
+.footerMask {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  height: 25%;
+  top: 0;
+  background: linear-gradient(0, transparent, black)
+}
+
+.headerMask {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  height: 10%;
+  bottom: 0;
+  background: linear-gradient(0, black, transparent);
+}
+
+.link {
+  color: #000000;
+  font-weight: bold;
+  font-size: 16px;
+  vertical-align: 5%;
+}
+
+.description {
+  font-size: 14px;
+}
