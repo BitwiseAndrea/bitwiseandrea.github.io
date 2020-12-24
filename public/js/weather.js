@@ -135,13 +135,14 @@
           rx = this.touchRx;
       }
       if (!this.touching) this.touchRx = .5 - (.5 - this.touchRx) * Config.rain.angleDecreaseFactor;
-      if (this.ry != ry) {
+      if (this.scrollY != window.scrollY) {
+          this.scrollY = window.scrollY;
           this.ry = ry;
           this.updateBackground(ry);
       }
       this.updateRain(rx, ry);
       this.updateSound(ry);
-      this.updateLightning(ry);
+      // this.updateLightning(ry);
       this.stage.update();
       log(this.ry);
   }
@@ -164,12 +165,16 @@
       SoundController.setVolume(this.soundCurrent, vol * 100);
   }
   p.updateBackground = function(r, forceCache) {
+      var elementOffset = 3000;
+      var percentage = window.scrollY / elementOffset;
+      var newFOrWhatever = Math.round(percentage * 100)
+
       var ref = lib.background.prototype.nominalBounds;
       var t = this.bg.timeline.duration;
       var old = this.bg.currentFrame;
       var f = Math.round(t * r);
-      if (old != f || forceCache) {
-          this.bg.gotoAndStop(f);
+      if (old != newFOrWhatever || forceCache) {
+          this.bg.gotoAndStop(newFOrWhatever);
           var ref = lib.background.prototype.nominalBounds;
           var w = ref.width;
           var h = ref.height;
