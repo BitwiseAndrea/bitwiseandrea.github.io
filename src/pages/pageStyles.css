@@ -1,6 +1,8 @@
 
 .page {
   font-family: monospace;
+  max-width: 970px;
+  margin: 0 auto;
 }
 
 .container {
@@ -42,7 +44,7 @@
 }
 
 .thunderSection {
-  background: linear-gradient(0, rgb(24, 0, 46), rgb(18, 0, 82));
+  background: linear-gradient(0, rgb(19 5 69), rgb(116 105 163));
   color: white;
 }
 

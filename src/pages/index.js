@@ -46,11 +46,9 @@ const IndexPage = () => {
       
       <div className='container'>
         <div className='section leavesSection'>
-          <p>
-            <span role="img" aria-label="Sunglasses smiley emoji">
-              Placeholder
-            </span>
-          </p>
+          <h2 className='title'>
+            Placeholder
+          </h2>
         </div>
 
         <div className='grid'>
