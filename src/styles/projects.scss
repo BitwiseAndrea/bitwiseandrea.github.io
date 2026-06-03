@@ -1,0 +1,789 @@
+// projects.scss
+// -----------------------------------------------------------------------------
+// Styles for the reusable project landing-page template (ProjectLanding.jsx).
+// Visually rhymes with the main painterly site but quieter — single screen,
+// static sky, no scroll choreography. Imports the shared reset/typography
+// from global.scss.
+
+@use './global.scss';
+
+// --- page shell -------------------------------------------------------------
+.project {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+// --- painterly background layers --------------------------------------------
+.project-sky {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.project-mountains {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 36vh;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+.project-mountains__svg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  display: block;
+}
+.project-mountains__far  { height: 28vh; bottom: 6vh;  color: rgba(8, 10, 30, 0.65); }
+.project-mountains__mid  { height: 32vh; bottom: 2vh;  color: rgba(6, 8, 24, 0.78); }
+.project-mountains__near { height: 36vh; bottom: -1vh; color: rgba(4, 5, 16, 0.95); }
+
+.project-fireflies {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+// --- top bar ----------------------------------------------------------------
+.project__top {
+  position: relative;
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px clamp(24px, 5vw, 60px);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(255, 246, 220, 0.85);
+}
+
+.project__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition:
+    background 240ms ease,
+    border-color 240ms ease,
+    transform 280ms cubic-bezier(.2,.7,.2,1);
+}
+.project__back:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateX(-2px);
+}
+.project__back-arrow {
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+.project__crumb {
+  opacity: 0.65;
+  letter-spacing: 0.3em;
+  font-family: ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  text-transform: none;
+  font-size: 11px;
+}
+
+// --- main column ------------------------------------------------------------
+.project__main {
+  position: relative;
+  z-index: 11;
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: clamp(24px, 6vh, 60px) clamp(24px, 5vw, 60px) clamp(80px, 14vh, 160px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(40px, 7vh, 80px);
+}
+
+// --- hero -------------------------------------------------------------------
+.project__hero {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 760px;
+}
+
+.project__kicker {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 11px;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 4px;
+}
+
+.project__title {
+  font-size: clamp(46px, 8vw, 92px);
+  line-height: 1.02;
+  font-weight: 400;
+  margin: 0;
+  letter-spacing: -0.012em;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.28);
+}
+
+.project__tagline {
+  font-size: clamp(18px, 1.6vw, 22px);
+  line-height: 1.55;
+  max-width: 640px;
+  margin: 0;
+  opacity: 0.94;
+}
+
+// --- CTAs -------------------------------------------------------------------
+.project__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.project__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-radius: 999px;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  transition:
+    background 240ms ease,
+    border-color 240ms ease,
+    transform 280ms cubic-bezier(.2,.7,.2,1),
+    box-shadow 240ms ease;
+}
+
+.project__cta--primary {
+  background: rgba(255, 240, 196, 0.94);
+  color: #1b1230;
+  border: 1px solid rgba(255, 240, 196, 0.94);
+  box-shadow: 0 10px 30px rgba(255, 240, 196, 0.18);
+  font-weight: 500;
+}
+.project__cta--primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 38px rgba(255, 240, 196, 0.28);
+  background: rgba(255, 247, 220, 1);
+}
+
+.project__cta--ghost {
+  background: rgba(20, 25, 40, 0.32);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.project__cta--ghost:hover {
+  transform: translateY(-3px);
+  background: rgba(60, 70, 110, 0.42);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+// --- highlights row ---------------------------------------------------------
+.project__highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+}
+.project__highlight {
+  padding: 18px 18px 20px;
+  border-radius: 14px;
+  background: rgba(20, 25, 40, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.project__highlight-label {
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.project__highlight-value {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+// --- body copy --------------------------------------------------------------
+.project__body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 720px;
+}
+.project__paragraph {
+  font-size: clamp(15px, 1.15vw, 17px);
+  line-height: 1.7;
+  margin: 0;
+  opacity: 0.92;
+}
+
+// --- stack chips ------------------------------------------------------------
+.project__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.project__stack-label {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.project__stack-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.project__stack-chip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+// --- screenshots ------------------------------------------------------------
+.project__shots { width: 100%; }
+
+.project__shot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+.project__shot {
+  margin: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(20, 25, 40, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 320ms cubic-bezier(.2,.7,.2,1), border-color 320ms ease;
+}
+.project__shot:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.34);
+}
+.project__shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.project__shot figcaption {
+  padding: 10px 14px 14px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  opacity: 0.78;
+}
+
+// --- screenshot placeholder -------------------------------------------------
+.project__shot-placeholder {
+  width: 100%;
+}
+.project__shot-placeholder-frame {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(20, 25, 40, 0.34);
+  border: 1px dashed rgba(255, 255, 255, 0.28);
+  padding: 60px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  min-height: 260px;
+}
+.project__shot-placeholder-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%);
+}
+.project__shot-placeholder-label {
+  position: relative;
+  font-size: 12px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.project__shot-placeholder-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  background: rgba(255, 240, 196, 0.92);
+  color: #1b1230;
+  border: 1px solid rgba(255, 240, 196, 0.92);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+  transition: transform 280ms cubic-bezier(.2,.7,.2,1), box-shadow 240ms ease;
+}
+.project__shot-placeholder-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(255, 240, 196, 0.22);
+}
+
+// --- footer -----------------------------------------------------------------
+.project__footer {
+  position: relative;
+  z-index: 11;
+  margin-top: auto;
+  padding: 22px clamp(24px, 5vw, 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+  background: rgba(4, 5, 15, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.project__footer a:hover { color: #fff; }
+.project__footer-sep { opacity: 0.5; }
+
+// ============================================================================
+// Long-form content blocks
+// ============================================================================
+// When a project entry has a `content: ContentBlock[]` field, ProjectLanding
+// renders an <article class="project__longform"> containing one .post__* node
+// per block. The selectors below intentionally use `.post__*` (not
+// `.project__*`) because they originate from a typed-block renderer that's
+// agnostic to the surrounding template — the same block markup could later be
+// reused elsewhere (e.g. a future /writing/ index) without restyling.
+
+.project__longform {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+// Headings
+.post__h2 {
+  font-size: clamp(26px, 2.6vw, 34px);
+  line-height: 1.18;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  margin: clamp(20px, 4vh, 40px) 0 4px;
+  color: rgba(255, 246, 220, 0.96);
+}
+
+.post__h3 {
+  font-size: clamp(19px, 1.7vw, 23px);
+  line-height: 1.25;
+  font-weight: 500;
+  margin: clamp(8px, 2vh, 18px) 0 2px;
+  color: rgba(255, 246, 220, 0.88);
+}
+
+// Paragraphs
+.post__p {
+  font-size: clamp(16px, 1.18vw, 18px);
+  line-height: 1.72;
+  margin: 0;
+  opacity: 0.94;
+  color: #f4f1e6;
+}
+
+// Inline elements
+.post__inline-code {
+  font-family: ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  font-size: 0.9em;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffefc4;
+  white-space: nowrap;
+}
+
+.post__inline-link {
+  color: #ffefc4;
+  border-bottom: 1px solid rgba(255, 239, 196, 0.4);
+  padding-bottom: 1px;
+  transition: border-color 220ms ease, color 220ms ease;
+
+  &:hover {
+    color: #fff;
+    border-bottom-color: #fff;
+  }
+}
+
+// Pull quote
+.post__quote {
+  margin: clamp(6px, 1.5vh, 12px) 0;
+  padding: 18px 22px;
+  border-left: 3px solid rgba(255, 239, 196, 0.7);
+  background: rgba(20, 25, 40, 0.32);
+  border-radius: 4px 14px 14px 4px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: clamp(18px, 1.5vw, 22px);
+  line-height: 1.5;
+  font-style: italic;
+  color: #fff;
+  letter-spacing: -0.005em;
+}
+
+.post__quote-attr {
+  display: block;
+  margin-top: 8px;
+  font-style: normal;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+
+// Callouts (asides) — e.g. the AI-asterisk note, the popcorn daydream
+.post__callout {
+  position: relative;
+  padding: 22px 24px 24px;
+  border-radius: 16px;
+  background: rgba(20, 25, 40, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.post__callout--aside {
+  border-color: rgba(255, 239, 196, 0.28);
+  background: rgba(40, 32, 24, 0.32);
+}
+
+.post__callout--tip {
+  border-color: rgba(180, 220, 255, 0.32);
+  background: rgba(20, 30, 50, 0.36);
+}
+
+.post__callout--aside-stark {
+  border: 1px dashed rgba(255, 255, 255, 0.34);
+  background: rgba(20, 25, 40, 0.22);
+  align-items: center;
+  text-align: center;
+}
+
+// Fun fact — recurring across Andrea's posts. Warm amber accent so it reads
+// as a delight-and-detour break, distinct from the calmer "tip" blue.
+.post__callout--fun-fact {
+  border-color: rgba(255, 196, 130, 0.42);
+  background: rgba(50, 28, 16, 0.36);
+  position: relative;
+  padding-left: 56px;
+
+  &::before {
+    content: '★';
+    position: absolute;
+    top: 22px;
+    left: 22px;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    line-height: 1;
+    color: #1b1230;
+    background: rgba(255, 196, 130, 0.94);
+    border-radius: 999px;
+  }
+
+  .post__callout-title {
+    color: rgba(255, 214, 168, 0.96);
+  }
+}
+
+.post__callout-title {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin: 0;
+  opacity: 0.88;
+  color: #ffefc4;
+}
+
+.post__callout-body {
+  font-size: clamp(15px, 1.1vw, 17px);
+  line-height: 1.65;
+  margin: 0;
+  opacity: 0.94;
+}
+
+// Figures (single image, full width of the body column)
+.post__figure {
+  margin: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(20, 25, 40, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 360ms cubic-bezier(.2,.7,.2,1), border-color 360ms ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.34);
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  figcaption {
+    padding: 12px 18px 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    opacity: 0.78;
+  }
+}
+
+// Gallery (multi-image side-by-side, e.g. the smile-family comparison)
+.post__gallery {
+  display: grid;
+  grid-template-columns: repeat(var(--post-gallery-cols, 3), minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+
+  @media (max-width: 720px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.post__gallery-shot {
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(20, 25, 40, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: transform 320ms cubic-bezier(.2,.7,.2,1), border-color 320ms ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.32);
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+  }
+
+  figcaption {
+    padding: 8px 10px 10px;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-align: center;
+    opacity: 0.86;
+  }
+}
+
+// Code blocks
+// Two states:
+//   - [data-highlighted="false"]: plain pre-rendered text (initial paint, or
+//     fallback if shiki failed to load). Uses the inherited cream foreground.
+//   - [data-highlighted="true"]:  shiki output, each token wrapped in <span>
+//     with an inline color style. We strip shiki's <pre> wrapper and keep our
+//     painterly chrome on the outer <pre>.
+.post__code {
+  margin: 0;
+  padding: 18px 22px;
+  border-radius: 14px;
+  background: rgba(10, 12, 24, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  overflow-x: auto;
+  font-family: ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #f4f1e6;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  code {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    color: inherit;
+    white-space: pre;
+  }
+
+  // Shiki wraps each source line in <span class="line"> and separates them
+  // with a literal '\n'. Inside our <pre> (white-space: pre) the newlines do
+  // the line-break work — the spans MUST stay inline. If you `display: block`
+  // them, you get double-spacing because the spans take a line AND the '\n'
+  // takes another. Keep this comment so future-me doesn't reintroduce that.
+  .line {
+    display: inline;
+  }
+
+  // Subtle fade-in once highlighting lands, so the plain → colored swap
+  // doesn't snap visually.
+  &[data-highlighted='true'] code {
+    animation: post-code-fade-in 200ms ease both;
+  }
+}
+
+@keyframes post-code-fade-in {
+  from { opacity: 0.55; }
+  to   { opacity: 1; }
+}
+
+// Lists
+.post__list {
+  margin: 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: clamp(16px, 1.18vw, 18px);
+  line-height: 1.68;
+  color: #f4f1e6;
+  opacity: 0.95;
+
+  li {
+    padding-left: 4px;
+    &::marker { color: rgba(255, 239, 196, 0.7); }
+  }
+}
+
+// Tables — capability matrices, comparison grids, etc.
+.post__table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 14px;
+  background: rgba(20, 25, 40, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+}
+
+.post__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: #f4f1e6;
+}
+
+.post__table-caption {
+  caption-side: bottom;
+  padding: 10px 18px 14px;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-align: left;
+  opacity: 0.75;
+}
+
+.post__table-th {
+  text-align: left;
+  vertical-align: bottom;
+  padding: 14px 18px;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 246, 220, 0.88);
+  background: rgba(10, 12, 24, 0.45);
+  border-bottom: 1px solid rgba(255, 239, 196, 0.34);
+  white-space: nowrap;
+}
+
+.post__table-td {
+  vertical-align: top;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  // Inline code inside table cells should breathe a little.
+  .post__inline-code {
+    font-size: 0.86em;
+    padding: 1px 5px;
+  }
+}
+
+.post__table-td--head {
+  font-weight: 500;
+  color: rgba(255, 246, 220, 0.96);
+}
+
+.post__table tbody tr:last-child .post__table-td {
+  border-bottom: 0;
+}
+
+// On narrow screens the wrap scrolls horizontally; soft fade hints at it.
+@media (max-width: 640px) {
+  .post__table {
+    min-width: 560px;
+  }
+}
+
+// Thematic break between acts
+.post__rule {
+  border: 0;
+  height: 1px;
+  margin: clamp(10px, 2vh, 24px) 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 239, 196, 0.32) 20%,
+    rgba(255, 239, 196, 0.32) 80%,
+    transparent 100%
+  );
+}

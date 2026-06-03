@@ -14,6 +14,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import RevealText from './RevealText.jsx';
+import { PROJECTS } from '../projects/data.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -88,26 +89,34 @@ export function DaylightScene({ id, label }) {
 // Garden — Projects
 // =============================================================================
 // Ferns growing up from the ground are handled by ForegroundFloraLayer.
+//
+// Project content is sourced from src/projects/data.js so the home cards and
+// the standalone /projects/<slug>/ pages stay in sync. Cards with an `href`
+// link to their landing page; otherwise they're rendered as inert articles.
 
-const PROJECTS = [
+const GARDEN_PLACEHOLDERS = [
   {
-    kicker: 'Roblox · 2026',
+    kicker: 'Roblox · soon',
     title: 'A world worth wandering',
     body:
       'An ambient social space exploring what makes a virtual place feel inhabited — light, sound, and the slow rhythms of weather.',
   },
   {
-    kicker: 'Web · ongoing',
-    title: 'bitwiseandrea.com',
-    body:
-      'This site. Hand-painted gradients, a canvas of rain that listens to your cursor, and a single continuous animation from dawn to dark.',
-  },
-  {
-    kicker: 'Tools',
+    kicker: 'Tools · ongoing',
     title: 'Tiny CLIs & UI bits',
     body:
       'A growing collection of small developer tools — design tokens, a markdown linter, a colour-palette generator that thinks in moods.',
   },
+];
+
+const GARDEN_PROJECTS = [
+  ...PROJECTS.map((p) => ({
+    kicker: p.kicker,
+    title: p.title,
+    body: p.tagline,
+    href: p.href,
+  })),
+  ...GARDEN_PLACEHOLDERS,
 ];
 
 export function GardenScene({ id, label }) {
@@ -122,7 +131,7 @@ export function GardenScene({ id, label }) {
       </RevealText>
 
       <div className="cards">
-        {PROJECTS.map((p, idx) => (
+        {GARDEN_PROJECTS.map((p, idx) => (
           <ProjectCard key={p.title} project={p} idx={idx} />
         ))}
       </div>
@@ -163,11 +172,27 @@ function ProjectCard({ project, idx }) {
     };
   }, [idx]);
 
-  return (
-    <article ref={ref} className="card" data-magnetic>
+  const inner = (
+    <>
       <div className="card__kicker">{project.kicker}</div>
       {project.title ? <h3 className="card__title">{project.title}</h3> : null}
       <p className="card__body">{project.body}</p>
+      {project.href ? (
+        <span className="card__more" aria-hidden="true">read more →</span>
+      ) : null}
+    </>
+  );
+
+  if (project.href) {
+    return (
+      <a ref={ref} className="card card--link" href={project.href} data-magnetic>
+        {inner}
+      </a>
+    );
+  }
+  return (
+    <article ref={ref} className="card" data-magnetic>
+      {inner}
     </article>
   );
 }

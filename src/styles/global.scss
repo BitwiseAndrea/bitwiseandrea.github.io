@@ -427,6 +427,27 @@ body.is-magnetic .custom-cursor-dot {
   margin: 0;
 }
 
+.card--link {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+.card__more {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  opacity: 0.78;
+  transition: opacity 220ms ease, transform 280ms cubic-bezier(.2,.7,.2,1);
+}
+.card--link:hover .card__more {
+  opacity: 1;
+  transform: translateX(4px);
+}
+
 // --- contact links ----------------------------------------------------------
 .contact-links {
   display: flex;
