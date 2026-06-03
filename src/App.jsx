@@ -15,6 +15,7 @@ import RainCursorCanvas from './components/RainCursorCanvas.jsx';
 import CustomCursor from './components/CustomCursor.jsx';
 import IntroCurtain from './components/IntroCurtain.jsx';
 import ConstellationOverlay from './components/ConstellationOverlay.jsx';
+import MoonHotspot from './components/MoonHotspot.jsx';
 import {
   DawnScene,
   DaylightScene,
@@ -115,6 +116,7 @@ export default function App() {
         </footer>
       </main>
 
+      <MoonHotspot onClick={openConstellations} />
       <CustomCursor />
       <ConstellationOverlay open={constellationOpen} onClose={closeConstellations} />
       <IntroCurtain onComplete={releaseScroll} />

@@ -677,6 +677,7 @@ export function NightScene({ id, label }) {
         <a className="contact-link" data-magnetic href="https://www.instagram.com/bitwiseandrea/" target="_blank" rel="noreferrer">instagram</a>
         <a className="contact-link" data-magnetic href="https://www.roblox.com/users/671440392/profile" target="_blank" rel="noreferrer">roblox</a>
       </div>
+      <p className="moon-hint">psst — the moon is listening.</p>
     </SceneSection>
   );
 }

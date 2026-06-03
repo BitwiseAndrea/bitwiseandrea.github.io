@@ -32,6 +32,14 @@ export default function RainCursorCanvas() {
     const onReduceChange = (e) => { reducedMotion = e.matches; };
     reduceQuery.addEventListener?.('change', onReduceChange);
 
+    // Touch devices (`pointer: coarse`) don't have a real cursor to chase,
+    // so we keep the rain ambient — driven entirely by the scroll plan's
+    // `rainBoost`. We still render drops, just never bind the mousemove /
+    // mouseleave listeners that would skew the spawn point and add a flick
+    // boost. Without this guard, mobile Safari's emulated mousemove events
+    // would clump the rain at the last-touched coordinate.
+    const isTouch = window.matchMedia('(pointer: coarse)').matches;
+
     const resize = () => {
       canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
@@ -52,9 +60,11 @@ export default function RainCursorCanvas() {
       mouse.y = e.clientY;
       mouse.last = now;
     };
-    window.addEventListener('mousemove', onMove);
     const onLeave = () => { mouse.x = -9999; mouse.y = -9999; };
-    window.addEventListener('mouseleave', onLeave);
+    if (!isTouch) {
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseleave', onLeave);
+    }
 
     let rainTarget = BASE_INTENSITY;
     const unsub = subscribe(({ plan }) => {
@@ -157,8 +167,10 @@ export default function RainCursorCanvas() {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseleave', onLeave);
+      if (!isTouch) {
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseleave', onLeave);
+      }
       reduceQuery.removeEventListener?.('change', onReduceChange);
       unsub();
     };

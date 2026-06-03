@@ -161,15 +161,64 @@ a { color: inherit; text-decoration: none; }
   box-shadow: inset 1px 1px 2px rgba(60, 50, 30, 0.4);
 }
 
-// When the moon is fully formed (last scene) the celestial body becomes the
-// click target for the constellation easter egg. We only enable pointer
-// events in that state to avoid stealing clicks from text earlier on.
+// When the moon is fully formed (last scene) the celestial body itself
+// becomes a click target. The visible body sits at z-index 2, so most of
+// the time the .page (z-index 10) covers it and the click never reaches
+// us — see .moon-hotspot below for the actual primary hit area.
 .celestial[data-moon='true'] {
   pointer-events: auto;
   cursor: pointer;
 }
-.celestial[data-moon='true']:hover .celestial__halo {
-  filter: blur(2px) brightness(1.15);
+
+// Transparent click target placed over the moon disc, above the page so
+// clicks actually reach it. Lives at z-index 11 (above .page, below .nav).
+// While the moon isn't out, it's pointer-events: none and aria-hidden so it
+// neither intercepts clicks nor announces itself.
+.moon-hotspot {
+  position: fixed;
+  border: 0;
+  background: transparent;
+  border-radius: 50%;
+  padding: 0;
+  margin: 0;
+  z-index: 11;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 400ms ease;
+  cursor: pointer;
+  // Tiny radial dim on hover to hint at interactivity without occluding
+  // the moon's actual gradient.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 14%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 248, 230, 0.10) 0%, rgba(255, 248, 230, 0) 65%);
+    opacity: 0;
+    transition: opacity 280ms ease;
+    pointer-events: none;
+  }
+}
+.moon-hotspot.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.moon-hotspot.is-active:hover::after,
+.moon-hotspot.is-active:focus-visible::after { opacity: 1; }
+.moon-hotspot:focus-visible { outline: none; }
+
+// Subtle "easter egg" hint in the night scene contact area.
+.moon-hint {
+  margin: 28px 0 0;
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: rgba(255, 250, 230, 0.55);
+  animation: moon-hint-pulse 4s ease-in-out infinite;
+}
+@keyframes moon-hint-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 0.95; }
 }
 
 // --- constellation easter egg ----------------------------------------------
@@ -393,6 +442,66 @@ a { color: inherit; text-decoration: none; }
 .nav__item--active .nav__label {
   opacity: 0.95;
   transform: translateX(0);
+}
+
+// --- mobile / narrow viewports --------------------------------------------
+// Flip the nav from a vertical pill on the right edge to a horizontal pill
+// pinned to the bottom-center. Labels are tucked above each dot so they
+// don't fight the dot for horizontal space; on narrow phones we just hide
+// the labels and show the active one as a single line above the pill.
+@media (max-width: 720px) {
+  // Reserve room at the bottom of every scene so the floating horizontal
+  // nav doesn't overlap content (especially the contact links in the
+  // night scene). max() keeps the iOS safe-area inset honored on devices
+  // with a home indicator.
+  .scene {
+    padding-bottom: max(140px, env(safe-area-inset-bottom, 0px) + 120px);
+  }
+
+  .nav {
+    top: auto;
+    right: auto;
+    bottom: max(clamp(14px, 3vh, 28px), env(safe-area-inset-bottom, 0px) + 12px);
+    left: 50%;
+    transform: translate(-50%, 0);
+    flex-direction: row;
+    gap: 18px;
+    padding: 12px 18px;
+  }
+
+  .nav__item {
+    width: 18px;
+    height: 18px;
+  }
+
+  // Labels float above the dot in mobile, fading in only for the active
+  // pip so the user can see what section they're on without crowding the
+  // pill with five tiny words.
+  .nav__label {
+    right: auto;
+    left: 50%;
+    bottom: calc(100% + 10px);
+    transform: translate(-50%, 6px);
+    font-size: 10px;
+    letter-spacing: 0.26em;
+    background: rgba(20, 20, 30, 0.55);
+    padding: 4px 10px;
+    border-radius: 999px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .nav__item:hover .nav__label,
+  .nav__item--active .nav__label {
+    transform: translate(-50%, 0);
+  }
+
+  // On a touch device, hover state is sticky/absent — only the active
+  // pip should show its label so the bar doesn't read as cluttered.
+  @media (pointer: coarse) {
+    .nav__item:hover .nav__label { opacity: 0; }
+    .nav__item--active .nav__label { opacity: 0.95; }
+  }
 }
 
 // --- custom cursor ----------------------------------------------------------
