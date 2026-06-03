@@ -32,11 +32,15 @@ body.has-custom-cursor button { cursor: none !important; }
 a { color: inherit; text-decoration: none; }
 
 // --- page shell -------------------------------------------------------------
+// z-index: 10 puts the entire scrollable content stack above every fixed
+// background layer (sky, celestial body, sun rays, mountains, flora,
+// weather, rain). Without this, the .page stacking context would trap the
+// scenes' z-index 10 underneath layers like the sun (z=2).
 .page {
   position: relative;
   width: 100%;
   overflow-x: hidden;
-  z-index: 1;
+  z-index: 10;
 }
 
 // --- layer stack ------------------------------------------------------------
@@ -49,13 +53,19 @@ a { color: inherit; text-decoration: none; }
 }
 
 // z-index stack (back -> front):
-// sky(1)  celestial(2)  mountains(3)  foreground-flora(4)  weather(5)
-//   rain-cursor(8)  scenes(10)  nav(80)  intro-curtain(120)  cursor(200)
-// The celestial body is BEHIND the mountains so the sun visibly rises and
-// sets behind them along the horizon.
+// sky(1)  celestial(2)  sun-rays(2)  mountains(3)  ocean(3.5)
+//   foreground-flora(4)  weather(5)  rain-cursor(8)  scenes(10)  nav(80)
+//   intro-curtain(120)  cursor(200)
+// The celestial body and the sun rays sit BEHIND the mountains so the sun
+// visibly rises and sets behind them along the horizon, and the rays look
+// like they're shafting up from beyond the silhouette. The ocean sits
+// just above the mountains so its waves visually replace them during the
+// Daylight scene (mountains fade with `1 - oceanAmount`).
 .sky-layer            { z-index: 1; }
 .celestial-layer      { z-index: 2; }
+.sun-rays             { z-index: 2; mix-blend-mode: screen; }
 .mountains-layer      { z-index: 3; }
+.ocean-layer          { z-index: 3; }
 .foreground-flora     { z-index: 4; }
 .weather-canvas       { z-index: 5; }
 .rain-cursor          { z-index: 8; }
@@ -85,6 +95,34 @@ a { color: inherit; text-decoration: none; }
 .mountains__far  { height: 28vh; bottom: 6vh;  }
 .mountains__mid  { height: 32vh; bottom: 2vh;  }
 .mountains__near { height: 36vh; bottom: -1vh; }
+
+// Ocean: three curvy wave layers anchored to viewport bottom, each drifting
+// horizontally at its own speed for a parallax water-surface effect. The
+// SVGs are authored 200vw wide and the keyframe shifts them by -50% over
+// a loop — the path is built so x=0 and x=50% match, giving a seamless,
+// gap-free drift.
+.ocean-layer {
+  overflow: hidden;
+  opacity: 0;
+  will-change: opacity;
+}
+.ocean {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 200vw;
+  height: 38vh;
+  display: block;
+  will-change: transform;
+}
+.ocean--far  { height: 22vh; bottom: 8vh;  animation: ocean-drift 22s linear infinite; }
+.ocean--mid  { height: 28vh; bottom: 3vh;  animation: ocean-drift 14s linear infinite; }
+.ocean--near { height: 34vh; bottom: -2vh; animation: ocean-drift  9s linear infinite; }
+
+@keyframes ocean-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
 
 // Celestial body: one sun-or-moon element positioned via JS.
 .celestial-layer { overflow: hidden; }
@@ -121,6 +159,170 @@ a { color: inherit; text-decoration: none; }
   border-radius: 50%;
   background: rgba(120, 110, 90, 0.34);
   box-shadow: inset 1px 1px 2px rgba(60, 50, 30, 0.4);
+}
+
+// When the moon is fully formed (last scene) the celestial body becomes the
+// click target for the constellation easter egg. We only enable pointer
+// events in that state to avoid stealing clicks from text earlier on.
+.celestial[data-moon='true'] {
+  pointer-events: auto;
+  cursor: pointer;
+}
+.celestial[data-moon='true']:hover .celestial__halo {
+  filter: blur(2px) brightness(1.15);
+}
+
+// --- constellation easter egg ----------------------------------------------
+// Full-screen overlay that fades over the world when the moon is clicked.
+// While `is-open`, the world layers behind it dim to deep navy via the
+// `.constellation-open` body class (see below). Clicking the centered moon
+// — or pressing escape — closes it again.
+.constellation-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: radial-gradient(ellipse at 50% 55%, #0b1126 0%, #04050f 70%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 700ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.constellation-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+// SVGs cover the whole overlay; we render in 100x100 user units stretched
+// to fill so coordinates from the constellation data behave like
+// percentages of the viewport.
+.constellation-overlay__stars,
+.constellation-overlay__map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.constellation-overlay__stars .bg-star {
+  fill: #f4f1ff;
+  opacity: 0.55;
+  animation: bg-star-twinkle 3s ease-in-out infinite;
+}
+@keyframes bg-star-twinkle {
+  0%, 100% { opacity: 0.18; }
+  50%      { opacity: 0.85; }
+}
+
+.constellation {
+  opacity: 0;
+  animation: constellation-in 1100ms ease forwards;
+}
+@keyframes constellation-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.constellation__line {
+  stroke: rgba(180, 200, 255, 0.55);
+  stroke-width: 0.12;
+  stroke-linecap: round;
+  fill: none;
+}
+.constellation__star {
+  fill: #fff5d8;
+  filter: drop-shadow(0 0 0.4px rgba(255, 240, 200, 0.9));
+}
+.constellation__label {
+  fill: rgba(220, 220, 255, 0.62);
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  font-size: 1.4px;
+  letter-spacing: 0.08px;
+  font-style: italic;
+}
+
+// Centered, big, glowing moon — also the click target for closing.
+.constellation-moon {
+  position: relative;
+  width: clamp(240px, 30vmin, 380px);
+  height: clamp(240px, 30vmin, 380px);
+  border-radius: 50%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  z-index: 1;
+  transform: translateY(8%) scale(0.92);
+  opacity: 0;
+  transition: transform 800ms cubic-bezier(.18,.8,.23,1) 80ms,
+              opacity 700ms ease 80ms;
+}
+.constellation-overlay.is-open .constellation-moon {
+  transform: translateY(8%) scale(1);
+  opacity: 1;
+}
+.constellation-moon:hover .constellation-moon__halo { opacity: 1; }
+.constellation-moon:focus-visible { outline: none; }
+.constellation-moon:focus-visible .constellation-moon__halo { opacity: 1; }
+
+.constellation-moon__halo {
+  position: absolute;
+  inset: -40%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(220, 230, 255, 0.55) 0%, rgba(220, 230, 255, 0) 65%);
+  opacity: 0.75;
+  transition: opacity 400ms ease;
+  pointer-events: none;
+}
+.constellation-moon__body {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 36%, #fff8e6 0%, #e9e1cc 60%, #b8b09a 100%);
+  box-shadow:
+    inset -8% -6% 14% rgba(60, 50, 30, 0.32),
+    0 0 60px rgba(245, 240, 220, 0.35);
+  overflow: hidden;
+}
+.constellation-moon__body > span {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(120, 110, 90, 0.34);
+  box-shadow: inset 1px 1px 2px rgba(60, 50, 30, 0.4);
+}
+
+.constellation-hint {
+  position: absolute;
+  bottom: 6vh;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: rgba(220, 225, 240, 0.55);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  font-style: italic;
+}
+.constellation-hint kbd {
+  font-family: inherit;
+  font-style: normal;
+  padding: 1px 6px;
+  border: 1px solid rgba(220, 225, 240, 0.35);
+  border-radius: 4px;
+}
+
+// While the overlay is open, the rest of the world dims and stops responding
+// to pointer events so the night sky owns the screen completely.
+.app-root.constellation-open {
+  .layer,
+  .page,
+  .nav {
+    transition: opacity 600ms ease, filter 600ms ease;
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 
 // --- navigation -------------------------------------------------------------
@@ -227,32 +429,57 @@ body.is-magnetic .custom-cursor-dot {
 }
 
 // --- intro curtain ----------------------------------------------------------
+// The curtain reads as a sunrise: a deep predawn sky on top, a warm horizon
+// glow at the bottom, and a soft swelling halo behind the wordmark. When the
+// timeline finishes, the panels peel apart to reveal the dawn scene which
+// uses a similar warm palette — so the transition feels like the world
+// brightening rather than a hard cut.
 .intro-curtain {
   position: fixed;
   inset: 0;
   z-index: 120;
   pointer-events: none;
+  overflow: hidden;
 }
 .intro-curtain__panel {
   position: absolute;
   left: 0;
   right: 0;
   height: 51%;
-  background: #04050f;
 }
-.intro-curtain__panel--top { top: 0; }
-.intro-curtain__panel--bot { bottom: 0; }
+.intro-curtain__panel--top {
+  top: 0;
+  background: linear-gradient(180deg, #2a1f4a 0%, #5b3f6e 55%, #c97a82 100%);
+}
+.intro-curtain__panel--bot {
+  bottom: 0;
+  background: linear-gradient(180deg, #c97a82 0%, #e6a06e 35%, #f9c98a 70%, #ffd9a8 100%);
+}
+.intro-curtain__glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(80vw, 720px);
+  height: min(80vw, 720px);
+  margin: calc(min(80vw, 720px) / -2) 0 0 calc(min(80vw, 720px) / -2);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 240, 200, 0.85) 0%, rgba(255, 200, 140, 0.45) 35%, rgba(255, 180, 120, 0) 70%);
+  filter: blur(2px);
+  opacity: 0;
+  will-change: transform, opacity;
+}
 .intro-curtain__mark {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: #fff;
+  color: #fff7e6;
   font-size: 12px;
   letter-spacing: 0.32em;
   text-transform: uppercase;
   z-index: 1;
   opacity: 0;
+  text-shadow: 0 0 18px rgba(255, 220, 170, 0.85);
 }
 
 // --- scene foundations ------------------------------------------------------
@@ -296,13 +523,18 @@ body.is-magnetic .custom-cursor-dot {
   padding-bottom: 4px;
 }
 
+// Scene text sits above the sun on the z-axis, but the sun is bright
+// enough that we need a halo of soft dark shadow behind every line of
+// copy to keep the type readable when it overlaps the disc or its rays.
 .scene__title {
   font-size: clamp(40px, 7vw, 92px);
   line-height: 1.02;
   font-weight: 400;
   margin: 0 0 22px;
   letter-spacing: -0.012em;
-  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.18);
+  text-shadow:
+    0 2px 24px rgba(0, 0, 0, 0.35),
+    0 0 32px rgba(20, 20, 40, 0.32);
 }
 
 .scene__lede {
@@ -311,6 +543,9 @@ body.is-magnetic .custom-cursor-dot {
   max-width: 640px;
   margin: 0 0 28px;
   opacity: 0.94;
+  text-shadow:
+    0 1px 14px rgba(0, 0, 0, 0.4),
+    0 0 22px rgba(20, 20, 40, 0.3);
 }
 .scene__content--center .scene__lede { margin-left: auto; margin-right: auto; }
 
@@ -319,6 +554,11 @@ body.is-magnetic .custom-cursor-dot {
   line-height: 1.65;
   max-width: 580px;
   opacity: 0.85;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
+}
+
+.scene__eyebrow {
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
 }
 
 // --- dawn signature line ----------------------------------------------------
@@ -433,6 +673,123 @@ body.is-magnetic .custom-cursor-dot {
   text-decoration: none;
   color: inherit;
   cursor: pointer;
+}
+
+// --- experience timeline (Daylight scene) -----------------------------------
+// Vertical stack of company cards. Each company contains one or more nested
+// role rows, so a multi-role tenure (e.g. Roblox) reads as a single timeline
+// rather than three disconnected jobs.
+.experience-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 40px;
+  width: 100%;
+}
+
+.experience {
+  position: relative;
+  padding: 26px 28px 28px;
+  border-radius: 16px;
+  background: rgba(20, 25, 40, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  transition: transform 320ms cubic-bezier(.2,.7,.2,1), background 320ms ease, border-color 320ms ease;
+  color: #fff;
+}
+.experience:hover {
+  transform: translateY(-4px);
+  background: rgba(40, 50, 80, 0.34);
+  border-color: rgba(255, 255, 255, 0.30);
+}
+
+.experience__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 18px;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+.experience__company {
+  margin: 0;
+  font-size: clamp(22px, 2.4vw, 28px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+.experience__meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.78;
+}
+
+.experience__roles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.role {
+  position: relative;
+  padding: 16px 18px 18px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  transition: background 240ms ease, border-color 240ms ease;
+}
+.role:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.role__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 14px;
+  margin-bottom: 4px;
+}
+.role__title {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+}
+.role__period {
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+.role__team {
+  font-size: 11.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.62;
+  margin-bottom: 10px;
+}
+.role__body {
+  font-size: 14.5px;
+  line-height: 1.6;
+  opacity: 0.88;
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .experience { padding: 22px 20px 22px; }
+  .role { padding: 14px 14px 16px; }
+  .role__head { flex-direction: column; align-items: flex-start; gap: 2px; }
 }
 .card__more {
   display: inline-block;

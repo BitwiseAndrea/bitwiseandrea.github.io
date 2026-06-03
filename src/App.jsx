@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import './styles/global.scss';
 
@@ -6,15 +6,19 @@ import { useLenis } from './lib/useLenis.js';
 import Navigation, { useScrollSpy } from './components/Navigation.jsx';
 import SkyLayer from './components/SkyLayer.jsx';
 import MountainsLayer from './components/MountainsLayer.jsx';
+import OceanLayer from './components/OceanLayer.jsx';
 import CelestialLayer from './components/CelestialLayer.jsx';
+import SunRaysLayer from './components/SunRaysLayer.jsx';
 import ForegroundFloraLayer from './components/ForegroundFloraLayer.jsx';
 import WeatherCanvas from './components/WeatherCanvas.jsx';
 import RainCursorCanvas from './components/RainCursorCanvas.jsx';
 import CustomCursor from './components/CustomCursor.jsx';
 import IntroCurtain from './components/IntroCurtain.jsx';
+import ConstellationOverlay from './components/ConstellationOverlay.jsx';
 import {
   DawnScene,
   DaylightScene,
+  DesertScene,
   GardenScene,
   StormScene,
   NightScene,
@@ -23,6 +27,7 @@ import {
 const SECTIONS = [
   { id: 'dawn',   label: 'Dawn' },
   { id: 'day',    label: 'About' },
+  { id: 'desert', label: 'Tooling' },
   { id: 'garden', label: 'Projects' },
   { id: 'storm',  label: 'Skills' },
   { id: 'night',  label: 'Contact' },
@@ -30,7 +35,8 @@ const SECTIONS = [
 
 export default function App() {
   const lenisRef = useLenis();
-  const activeId = useScrollSpy(SECTIONS);
+  const [activeId, pinNavTo] = useScrollSpy(SECTIONS);
+  const [constellationOpen, setConstellationOpen] = useState(false);
 
   // While the curtain is up, lock the scroll so users land on the hero
   // instead of mid-way down if they refreshed.
@@ -54,16 +60,38 @@ export default function App() {
   const handleNavSelect = useCallback((id) => {
     const el = document.getElementById(id);
     if (!el) return;
+    // Pin the nav highlight to the clicked section before kicking off the
+    // smooth scroll. Without the pin, the directional scroll-spy would
+    // briefly light up every section we pass during the animated jump.
+    pinNavTo(id);
     const lenis = lenisRef.current;
     if (lenis) lenis.scrollTo(el, { offset: 0, duration: 1.4 });
     else el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, [lenisRef]);
+  }, [lenisRef, pinNavTo]);
+
+  // While the constellation overlay is up, freeze the page so users don't
+  // accidentally scroll the world behind it.
+  useEffect(() => {
+    const lenis = lenisRef.current;
+    if (!lenis) return undefined;
+    if (constellationOpen) {
+      lenis.stop();
+    } else {
+      lenis.start();
+    }
+    return undefined;
+  }, [constellationOpen, lenisRef]);
+
+  const openConstellations = useCallback(() => setConstellationOpen(true), []);
+  const closeConstellations = useCallback(() => setConstellationOpen(false), []);
 
   return (
-    <>
+    <div className={`app-root${constellationOpen ? ' constellation-open' : ''}`}>
       <SkyLayer />
+      <CelestialLayer onMoonClick={openConstellations} />
+      <SunRaysLayer />
       <MountainsLayer />
-      <CelestialLayer />
+      <OceanLayer />
       <ForegroundFloraLayer />
       <WeatherCanvas />
       <RainCursorCanvas />
@@ -77,6 +105,7 @@ export default function App() {
       <main className="page">
         <DawnScene     id="dawn"   label="Hello" />
         <DaylightScene id="day"    label="About" />
+        <DesertScene   id="desert" label="Tooling" />
         <GardenScene   id="garden" label="Projects" />
         <StormScene    id="storm"  label="Skills" />
         <NightScene    id="night"  label="Contact" />
@@ -87,7 +116,8 @@ export default function App() {
       </main>
 
       <CustomCursor />
+      <ConstellationOverlay open={constellationOpen} onClose={closeConstellations} />
       <IntroCurtain onComplete={releaseScroll} />
-    </>
+    </div>
   );
 }

@@ -36,9 +36,10 @@ function SceneSection({ id, label, ariaLabel, children, decorations, contentAlig
 // =============================================================================
 // Dawn — Hero
 // =============================================================================
-// Trees that sprout up from the ground are handled by ForegroundFloraLayer
-// (so they stay rooted to the viewport bottom even as you scroll through the
-// rest of the page).
+// No foreground flora here — dawn is intentionally bare, just sky, sun,
+// mountains. Cacti sprout later (desert), then lush garden trees (garden).
+// Both are handled by ForegroundFloraLayer, which keeps them rooted to the
+// viewport bottom as you scroll through the rest of the page.
 
 export function DawnScene({ id, label }) {
   return (
@@ -64,8 +65,144 @@ export function DawnScene({ id, label }) {
 }
 
 // =============================================================================
-// Daylight — About
+// Daylight — About / Experience
 // =============================================================================
+// Resume-style vertical list. Each company is a card; companies with multiple
+// roles (Roblox) nest the roles inside a single card so the progression reads
+// as a single timeline rather than three separate jobs.
+
+const EXPERIENCE = [
+  {
+    company: 'Roblox',
+    location: 'San Mateo, CA',
+    period: '2018 — Present',
+    roles: [
+      {
+        title: 'Engineering Manager',
+        team: 'Design Systems & Accessibility · Luau UI Ecosystem',
+        period: 'Sept 2024 — Present',
+        body:
+          'Lead the team behind Foundation — Roblox\u2019s cross-product design system spanning App, In-Experience UI, and Studio, along with its critical tooling. Defined the vision, roadmap, and quality bar; shipped 40+ components with ~20% combined adoption across the company. Conceived and orchestrated 5+ major accessibility features with full app-wide support, acting as the strategic product lead across every frontend-facing team at Roblox.',
+      },
+      {
+        title: 'Senior Software Engineer & Tech Lead',
+        team: 'Creator · Social · Design Systems & Accessibility',
+        period: 'July 2021 — Sept 2024',
+        body:
+          'Architected 5+ foundational user journeys as the inaugural feature developer on create.roblox.com — now serving millions of creators per day. Returned to Social to lead full-stack initiatives for Groups, then became the founding member of Design Systems & Accessibility, conducting the audit and overhaul of the legacy component library that led to the new system and additional staffing.',
+      },
+      {
+        title: 'Software Engineer',
+        team: 'Social · Avatar',
+        period: 'July 2018 — July 2021',
+        body:
+          'Joined as one of fewer than 10 frontend-leaning full-stack engineers at a 300-person company. Lead frontend engineer for 10+ consumer-facing surfaces on roblox.com; self-directed UI design and prototyping for several core pages to accelerate the product lifecycle. Built primarily in AngularJS while touching every part of the stack — including C# services and iOS/Android native code — to ensure 100% feature parity.',
+      },
+    ],
+  },
+  {
+    company: 'Apple',
+    location: 'Cupertino, CA',
+    period: 'July 2016 — March 2018',
+    roles: [
+      {
+        title: 'Software Engineer',
+        team: 'Accessibility',
+        period: 'July 2016 — March 2018',
+        body:
+          'Contributed to Apple\u2019s award-winning accessibility features — including VoiceOver, System Zoom, and platform-wide app accessibility — and designed innovative new solutions to deliver the best possible experience to users with disabilities.',
+      },
+    ],
+  },
+  {
+    company: 'Google',
+    location: 'Mountain View, CA',
+    period: 'May 2015 — Aug 2015',
+    roles: [
+      {
+        title: 'Software Engineering Intern',
+        team: 'Accessibility',
+        period: 'May 2015 — Aug 2015',
+        body:
+          'Implemented analytics into the Accessibility Checker Android application, modified existing checks to fit a new UI element representation, contributed additional checks to the testing framework, and wrote Robolectric tests.',
+      },
+    ],
+  },
+  {
+    company: 'Google',
+    location: 'Mountain View, CA',
+    period: 'TODO — earlier internship',
+    roles: [
+      {
+        title: 'Software Engineering Intern',
+        team: 'TODO — team',
+        period: 'TODO',
+        body:
+          'TODO — fill in the second Google internship: team, project, and a sentence on impact.',
+      },
+    ],
+  },
+];
+
+function ExperienceCard({ entry, idx }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      gsap.set(el, { opacity: 1, y: 0 });
+      return undefined;
+    }
+    const tween = gsap.fromTo(
+      el,
+      { opacity: 0, y: 40 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 1.0,
+        ease: 'power3.out',
+        delay: idx * 0.10,
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 92%',
+          end: 'bottom 20%',
+          toggleActions: 'play none none reverse',
+        },
+      }
+    );
+    return () => {
+      tween.scrollTrigger?.kill();
+      tween.kill();
+    };
+  }, [idx]);
+
+  return (
+    <article ref={ref} className="experience">
+      <header className="experience__head">
+        <h3 className="experience__company">{entry.company}</h3>
+        <div className="experience__meta">
+          <span>{entry.location}</span>
+          <span aria-hidden="true">·</span>
+          <span>{entry.period}</span>
+        </div>
+      </header>
+      <ul className="experience__roles">
+        {entry.roles.map((role) => (
+          <li key={role.title + role.period} className="role">
+            <div className="role__head">
+              <span className="role__title">{role.title}</span>
+              <span className="role__period">{role.period}</span>
+            </div>
+            {role.team ? <div className="role__team">{role.team}</div> : null}
+            <p className="role__body">{role.body}</p>
+          </li>
+        ))}
+      </ul>
+    </article>
+  );
+}
+
 export function DaylightScene({ id, label }) {
   return (
     <SceneSection id={id} label={label}>
@@ -73,14 +210,74 @@ export function DaylightScene({ id, label }) {
         Designing the daylight hours.
       </RevealText>
       <RevealText as="p" className="scene__lede" split="words" stagger={0.014}>
-        I write frontend code, sketch interfaces, and quietly over-engineer
-        my side projects. I care about craft, performance, and the details
-        you only notice if you're looking.
+        I'm an engineering manager at Roblox, leading the team behind
+        Foundation — our cross-product design system and the accessibility
+        platform underneath it. Over a decade in, I'm still quietly obsessed
+        with craft, accessibility, and the small details that make an
+        interface feel like a place.
       </RevealText>
-      <RevealText as="p" className="scene__body" split="lines" stagger={0.08}>
-        Currently building experiences at Roblox. Previously a long list of
-        web apps, design systems, and the occasional Roblox world.
+
+      <div className="experience-list">
+        {EXPERIENCE.map((entry, idx) => (
+          <ExperienceCard key={entry.company + entry.period} entry={entry} idx={idx} />
+        ))}
+      </div>
+    </SceneSection>
+  );
+}
+
+// =============================================================================
+// Desert — Tooling
+// =============================================================================
+// Sandy, sun-baked landscape between Daylight and Garden. Hosts the "tools"
+// gallery — things I build *for* projects rather than the projects themselves.
+// Cacti grown from ForegroundFloraLayer's CACTUS group sprout in here and
+// wither away into the Garden scene.
+//
+// PLACEHOLDER copy: the two tool entries below are intentionally lightweight
+// (kicker / title / body — no full landing pages). Andrea can rewrite them in
+// place when each tool has a story worth telling. The "Tiny CLIs & UI bits"
+// entry that previously lived in Garden moved here because it's tooling, not
+// a project.
+
+const TOOLS = [
+  {
+    kicker: 'Roblox · plugins',
+    title: 'Studio plugins',
+    body:
+      'A small fleet of Roblox Studio plugins I build to make my own day-to-day faster — token sync, layout audits, FACS pose authoring. Tools for me first; everyone else welcome.',
+  },
+  {
+    kicker: 'Web · embed',
+    title: 'Form embedder',
+    body:
+      'A no-fuss way to drop a styled form into any static site without standing up a backend. Validates client-side, POSTs through a tiny Worker, and inherits the host page\u2019s typography.',
+  },
+  {
+    kicker: 'Tools · ongoing',
+    title: 'Tiny CLIs & UI bits',
+    body:
+      'A growing collection of small developer tools — design tokens, a markdown linter, a colour-palette generator that thinks in moods.',
+  },
+];
+
+export function DesertScene({ id, label }) {
+  return (
+    <SceneSection id={id} label={label}>
+      <RevealText as="h2" className="scene__title" split="words" stagger={0.06} yFrom="100%">
+        Tools for desolate places.
       </RevealText>
+      <RevealText as="p" className="scene__lede" split="words" stagger={0.014}>
+        Not every patch of land grows a project. Some of it grows *tooling* —
+        the small, sharp things I build to make the next project easier. A
+        cactus garden of utilities, plugins, and embedders.
+      </RevealText>
+
+      <div className="cards">
+        {TOOLS.map((t, idx) => (
+          <ProjectCard key={t.title} project={t} idx={idx} />
+        ))}
+      </div>
     </SceneSection>
   );
 }
@@ -88,7 +285,8 @@ export function DaylightScene({ id, label }) {
 // =============================================================================
 // Garden — Projects
 // =============================================================================
-// Ferns growing up from the ground are handled by ForegroundFloraLayer.
+// Lush garden trees growing up from the ground are handled by
+// ForegroundFloraLayer.
 //
 // Project content is sourced from src/projects/data.js so the home cards and
 // the standalone /projects/<slug>/ pages stay in sync. Cards with an `href`
@@ -100,12 +298,6 @@ const GARDEN_PLACEHOLDERS = [
     title: 'A world worth wandering',
     body:
       'An ambient social space exploring what makes a virtual place feel inhabited — light, sound, and the slow rhythms of weather.',
-  },
-  {
-    kicker: 'Tools · ongoing',
-    title: 'Tiny CLIs & UI bits',
-    body:
-      'A growing collection of small developer tools — design tokens, a markdown linter, a colour-palette generator that thinks in moods.',
   },
 ];
 
@@ -214,10 +406,14 @@ function makeBoltPath(startX, startY, endX, endY, segments = 8) {
 }
 
 const SKILLS = [
-  { kicker: 'Languages', body: 'TypeScript · JavaScript · Lua · Python · a little Rust' },
-  { kicker: 'Frontend',  body: 'React · Vite · GSAP · framer-motion · SCSS · canvas / WebGL' },
-  { kicker: 'Roblox',    body: 'Luau · ProfileService · UI frameworks · experience design' },
-  { kicker: 'Tooling',   body: 'Vite · Webpack · Figma · GitHub Actions · Vercel · Cloudflare' },
+  { kicker: 'Languages',     body: 'TypeScript · JavaScript · Lua · Luau · C# · HTML · CSS' },
+  { kicker: 'Frontend',      body: 'React · AngularJS · SCSS · GSAP · canvas / WebGL' },
+  { kicker: 'Design systems', body: 'component libraries · design tokens · cross-product UI · adoption at scale' },
+  { kicker: 'Accessibility', body: 'WCAG · keyboard nav · screen readers · platform-level a11y features' },
+  { kicker: 'Roblox',        body: 'Luau · Roblox Studio · ProfileService · UI frameworks · experience design' },
+  { kicker: 'Leadership',    body: 'team building · roadmap & vision · technical strategy · cross-functional partnership' },
+  { kicker: 'Tools',         body: 'Cursor · Git · VS Code · Figma · Jira · Docker · GitHub Actions' },
+  { kicker: 'Spoken',        body: 'English · Spanish · ASL' },
 ];
 
 export function StormScene({ id, label }) {
@@ -232,74 +428,140 @@ export function StormScene({ id, label }) {
     const boltLayer = boltLayerRef.current;
     if (!section || !flash || !boltLayer) return undefined;
 
+    // Reset mount flag on every effect run. In React 18 StrictMode the
+    // first effect's cleanup sets `mounted = false` before the second
+    // effect runs — without this re-initialization the loop would
+    // silently bail out forever in dev.
+    stateRef.current.mounted = true;
+    stateRef.current.visible = false;
+
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const trigger = ScrollTrigger.create({
-      trigger: section,
-      start: 'top 80%',
-      end: 'bottom 20%',
-      onToggle: (self) => { stateRef.current.visible = self.isActive; },
-    });
+    // Visibility is tracked with an IntersectionObserver instead of a
+    // GSAP ScrollTrigger. ScrollTrigger caches the section's measured
+    // pixel position when the trigger is created, and was missing
+    // re-measurement when sibling sections (DesertScene, the longer
+    // resume in DaylightScene, etc.) reflowed the page after first
+    // paint — leaving `visible` stuck at `false` and silently
+    // swallowing every lightning tick. IntersectionObserver always
+    // reflects the live viewport, so adding/removing scenes can never
+    // strand it.
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const wasVisible = stateRef.current.visible;
+          stateRef.current.visible = entry.isIntersecting;
+          // First-strike: when the storm crosses INTO view, kick off
+          // a bolt almost immediately so the user doesn't have to
+          // wait out the random interval before the first flash.
+          if (!wasVisible && entry.isIntersecting && !reduce) {
+            window.setTimeout(() => {
+              if (stateRef.current.visible && stateRef.current.mounted) {
+                stateRef.current.fire?.();
+              }
+            }, 220);
+          }
+        }
+      },
+      // Activate as soon as any of the section is showing; fire even
+      // a little before the section is fully in view so the storm
+      // mood is announced as you approach.
+      { threshold: 0, rootMargin: '0px 0px -10% 0px' }
+    );
+    io.observe(section);
 
     if (reduce) {
-      return () => trigger.kill();
+      return () => io.disconnect();
     }
 
     const fire = () => {
       if (!stateRef.current.visible || !stateRef.current.mounted) return;
 
-      const startX = 60 + Math.random() * (window.innerWidth - 120);
-      const startY = 40 + Math.random() * 80;
-      const endY = window.innerHeight * (0.55 + Math.random() * 0.25);
-      const endX = startX + (Math.random() - 0.5) * 200;
+      // Bolts live in an SVG that fills the storm scene (which can be
+      // taller than the viewport). Spawn coordinates need to be in
+      // the section's local space, but the bolt should *visually*
+      // appear in the upper portion of the viewport — so we offset
+      // by the section's current viewport top. As the user scrolls
+      // through the scene, bolts keep flashing where they're
+      // actually visible instead of stranding off-screen above.
+      const rect = section.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const offsetY = -rect.top;
 
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', makeBoltPath(startX, startY, endX, endY));
-      path.setAttribute('stroke', '#f8fbff');
-      path.setAttribute('stroke-width', '2.6');
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke-linecap', 'round');
-      path.setAttribute('stroke-linejoin', 'round');
-      path.style.filter = 'drop-shadow(0 0 14px rgba(220, 230, 255, 0.9))';
-      boltLayer.appendChild(path);
+      // Each "strike" is 1-3 forks within ~80px of each other, so it
+      // reads as a real lightning bolt rather than a single hairline.
+      const forks = 1 + Math.floor(Math.random() * 3);
+      const baseStartX = 60 + Math.random() * (vw - 120);
+      const baseStartY = offsetY + 20 + Math.random() * 80;
+      const baseEndY = offsetY + vh * (0.55 + Math.random() * 0.30);
 
-      gsap.fromTo(
-        path,
-        { opacity: 0 },
-        {
-          keyframes: [{ opacity: 1, duration: 0.05 }, { opacity: 0.4, duration: 0.08 }, { opacity: 1, duration: 0.06 }, { opacity: 0, duration: 0.25 }],
-          onComplete: () => path.remove(),
-        }
-      );
+      for (let i = 0; i < forks; i++) {
+        const startX = baseStartX + (Math.random() - 0.5) * 90;
+        const startY = baseStartY + (Math.random() - 0.5) * 30;
+        const endY = baseEndY + (Math.random() - 0.5) * 80;
+        const endX = startX + (Math.random() - 0.5) * 220;
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', makeBoltPath(startX, startY, endX, endY));
+        path.setAttribute('stroke', '#f8fbff');
+        path.setAttribute('stroke-width', i === 0 ? '3.4' : '2.0');
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
+        path.style.filter =
+          'drop-shadow(0 0 22px rgba(220, 230, 255, 1)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.9))';
+        boltLayer.appendChild(path);
+
+        gsap.fromTo(
+          path,
+          { opacity: 0 },
+          {
+            keyframes: [
+              { opacity: 1,    duration: 0.04 },
+              { opacity: 0.6,  duration: 0.06 },
+              { opacity: 1,    duration: 0.05 },
+              { opacity: 0.85, duration: 0.20 },
+              { opacity: 0,    duration: 0.55 },
+            ],
+            delay: i * 0.04,
+            onComplete: () => path.remove(),
+          }
+        );
+      }
 
       gsap.fromTo(
         flash,
         { backgroundColor: 'rgba(255, 255, 255, 0)' },
         {
           keyframes: [
-            { backgroundColor: 'rgba(245, 247, 255, 0.55)', duration: 0.05 },
-            { backgroundColor: 'rgba(255, 255, 255, 0)', duration: 0.18 },
-            { backgroundColor: 'rgba(220, 230, 255, 0.25)', duration: 0.05 },
-            { backgroundColor: 'rgba(255, 255, 255, 0)', duration: 0.35 },
+            { backgroundColor: 'rgba(245, 247, 255, 0.85)', duration: 0.05 },
+            { backgroundColor: 'rgba(255, 255, 255, 0)',    duration: 0.18 },
+            { backgroundColor: 'rgba(220, 230, 255, 0.45)', duration: 0.05 },
+            { backgroundColor: 'rgba(255, 255, 255, 0)',    duration: 0.45 },
           ],
         }
       );
     };
 
     let cancelled = false;
+    stateRef.current.fire = fire;
     const loop = () => {
       if (cancelled) return;
       fire();
-      const next = 3000 + Math.random() * 5000;
+      // Tighter cadence so the user reliably sees at least one bolt
+      // while scrolling through the storm; still randomized for a
+      // natural feel.
+      const next = 1500 + Math.random() * 3000;
       setTimeout(loop, next);
     };
-    const start = setTimeout(loop, 1800);
+    const start = setTimeout(loop, 900);
 
     return () => {
       cancelled = true;
       stateRef.current.mounted = false;
       clearTimeout(start);
-      trigger.kill();
+      io.disconnect();
     };
   }, []);
 
@@ -319,11 +581,12 @@ export function StormScene({ id, label }) {
       <div className="scene__content scene__content--left">
         <span className="scene__eyebrow">{label}</span>
         <RevealText as="h2" className="scene__title" split="words" stagger={0.06} yFrom="100%">
-          A storm in the toolbox.
+          The forecast.
         </RevealText>
         <RevealText as="p" className="scene__lede" split="words" stagger={0.014}>
-          A mix of comfortable old friends and shiny new toys. Move your
-          cursor around — the rain is listening.
+          Over a decade of frontend, design systems, and accessibility —
+          comfortable old friends I've shipped at scale, and the shiny new
+          toys I'm playing with after hours.
         </RevealText>
 
         <div className="cards">
@@ -408,10 +671,11 @@ export function NightScene({ id, label }) {
         love to hear from you.
       </RevealText>
       <div className="contact-links">
-        <a className="contact-link" data-magnetic href="mailto:hi@bitwiseandrea.com">email</a>
+        <a className="contact-link" data-magnetic href="mailto:bitwiseandrea@gmail.com">email</a>
         <a className="contact-link" data-magnetic href="https://github.com/bitwiseandrea" target="_blank" rel="noreferrer">github</a>
-        <a className="contact-link" data-magnetic href="https://www.linkedin.com/" target="_blank" rel="noreferrer">linkedin</a>
-        <a className="contact-link" data-magnetic href="https://www.roblox.com/" target="_blank" rel="noreferrer">roblox · soon</a>
+        <a className="contact-link" data-magnetic href="https://www.linkedin.com/in/bitwiseandrea/" target="_blank" rel="noreferrer">linkedin</a>
+        <a className="contact-link" data-magnetic href="https://www.instagram.com/bitwiseandrea/" target="_blank" rel="noreferrer">instagram</a>
+        <a className="contact-link" data-magnetic href="https://www.roblox.com/users/671440392/profile" target="_blank" rel="noreferrer">roblox</a>
       </div>
     </SceneSection>
   );

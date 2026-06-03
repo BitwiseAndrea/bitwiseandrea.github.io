@@ -12,7 +12,7 @@
 import React, { useEffect, useRef } from 'react';
 import { subscribe, getScrollState } from '../lib/scrollState.js';
 
-export default function CelestialLayer() {
+export default function CelestialLayer({ onMoonClick }) {
   const wrapRef = useRef(null);
   const bodyRef = useRef(null);
   const haloRef = useRef(null);
@@ -44,6 +44,27 @@ export default function CelestialLayer() {
       halo.style.opacity = `${0.4 + plan.sunGlow * 0.6}`;
 
       crater.style.opacity = `${plan.sunCrater}`;
+
+      // The body is clickable only when we're well into "moon" state, so
+      // the easter-egg trigger doesn't fire while the sun is on screen.
+      // We also flip role/aria/tabIndex imperatively so AT users only hear
+      // the "open the night sky" affordance once it's actually wired up.
+      const moonish = plan.sunCrater > 0.85;
+      const wasMoon = wrap.dataset.moon === 'true';
+      if (moonish !== wasMoon) {
+        wrap.dataset.moon = moonish ? 'true' : 'false';
+        if (onMoonClick && moonish) {
+          wrap.setAttribute('role', 'button');
+          wrap.setAttribute('aria-label', 'Open the night sky');
+          wrap.setAttribute('tabindex', '0');
+          wrap.removeAttribute('aria-hidden');
+        } else {
+          wrap.removeAttribute('role');
+          wrap.removeAttribute('aria-label');
+          wrap.removeAttribute('tabindex');
+          wrap.setAttribute('aria-hidden', 'true');
+        }
+      }
     };
 
     const unsub = subscribe(apply);
@@ -55,9 +76,27 @@ export default function CelestialLayer() {
     };
   }, []);
 
+  const handleClick = () => {
+    if (!onMoonClick) return;
+    const wrap = wrapRef.current;
+    if (!wrap || wrap.dataset.moon !== 'true') return;
+    onMoonClick();
+  };
+
   return (
     <div className="layer celestial-layer" aria-hidden="true">
-      <div ref={wrapRef} className="celestial">
+      <div
+        ref={wrapRef}
+        className="celestial"
+        onClick={onMoonClick ? handleClick : undefined}
+        onKeyDown={onMoonClick ? (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick();
+          }
+        } : undefined}
+        aria-hidden="true"
+      >
         <div ref={haloRef} className="celestial__halo" />
         <div ref={bodyRef} className="celestial__body" />
         <div ref={craterRef} className="celestial__craters">

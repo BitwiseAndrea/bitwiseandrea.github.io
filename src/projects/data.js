@@ -23,31 +23,519 @@ const MORPH_SHOTS = '/projects/morph-your-head/screenshots';
 
 export const PROJECTS = [
   // ---------------------------------------------------------------------------
-  // Super Chess — short landing
+  // Super Chess — long-form write-up
   // ---------------------------------------------------------------------------
   {
     slug: 'super-chess',
     kicker: 'Web · 2026',
     title: 'Super Chess',
     tagline:
-      'Standard chess plus a 20-card deck that can freeze pieces, teleport them, build shields, or rewind time. A web sim plays hundreds of games against itself to balance the cards.',
+      "What happens if you bolt a small card game onto standard chess. A shared deck of cards plays before each chess move and can freeze pieces, shield them, push pawns sideways, or block off a square the opponent wanted. The default deck is six cards today; 20+ live in the registry and rotate in for playtests. A nightly sim plays 500 games against itself so I can tune the cards without ever clicking a square.",
     palette: 'dusk',
     href: '/projects/super-chess/',
     demoUrl: 'https://super-chess.bitwiseandrea.com',
     githubUrl: 'https://github.com/BitwiseAndrea/super-chess',
     stack: ['TypeScript', 'Vite', 'D3', 'Vitest', 'Cloudflare Workers', 'Luau (Roblox port)'],
-    body: [
-      "Chess is one of the most thoroughly tuned games in the world. Super Chess asks: what happens if you bolt a small card game onto it? Each player holds two cards from a shared deck of 20. Cards play before a chess move and do things like freeze an opponent's piece for a turn, shield a piece from capture, teleport one of your own pieces to an empty square, or grant an extra chess move on top of the one you were going to make.",
-      "The web app ships two things in one bundle: a real-time playable simulator with a minimax engine + a heuristic card AI, and a batch runner that plays 500+ games at high speed and exports per-card win-rate and play-rate stats so you can iterate on card balance without guessing.",
-      "There's also a Roblox port of the engine + 16/20 cards written in Luau, sharing the same perft-validated move generator (1 / 20 / 400 / 8902 through depth 3), as a graybox 3D place with SurfaceGui card hands.",
-    ],
     highlights: [
-      { label: 'Cards', value: '20 unique' },
+      { label: 'Default deck', value: '6 cards' },
+      { label: 'In the registry', value: '20+ designed' },
       { label: 'Engine', value: 'minimax + αβ + quiescence' },
       { label: 'Bench', value: 'perft(3) = 8902 ✓' },
-      { label: 'Sim', value: '500-game nightly run on CI' },
     ],
-    screenshots: [],
+    content: [
+      // -----------------------------------------------------------------
+      // Hook — Andrea's own dictated origin story.
+      // -----------------------------------------------------------------
+      {
+        type: 'paragraph',
+        text:
+          "Super Chess started, more than anything, as a way to **annoy my boyfriend**. I have a lot of close friends who play chess and are *very* into it, and while I know the rules, I cannot say I really know how to play chess in any significant way. And quite frankly — it's not a game I want to learn. When I look at the people who have these high Elos, it's a lot of memorization and a lot of strategy, and that's just not what interests me about games.",
+      },
+      {
+        type: 'paragraph',
+        text:
+          "So Super Chess started off as a question: *what if I took the fundamentals of chess and added some form of randomness to it?* Not enough to break it. Just enough that the people who have spent ten thousand hours memorizing openings can't quite use any of those memorized openings, and the rest of us get a fighting chance to do something interesting on move three.",
+      },
+
+      // -----------------------------------------------------------------
+      // In short — exec summary
+      // -----------------------------------------------------------------
+      { type: 'heading', level: 2, text: 'In short' },
+      {
+        type: 'paragraph',
+        text:
+          "Super Chess is **standard chess plus a shared deck of cards**. Each player holds up to two cards. A card plays *before* a chess move and does things like freeze an opponent's piece for a turn, shield one of your own pieces from capture, or block off a square the opponent wanted to move into. The current default deck is **six cards**; another sixteen are designed, registered, and runnable behind a config flag while playtesting catches up. The whole thing ships in three pieces:",
+      },
+      {
+        type: 'list',
+        ordered: true,
+        items: [
+          "**A real chess engine.** Full legal-move generation (perft(3) = 8902 ✓), negamax + alpha-beta + quiescence. Without that, none of the rest of this is testable.",
+          "**A real-time playable simulator** in the browser, with a heuristic Card AI on top of the chess bot.",
+          "**A batch runner** that plays hundreds of games against itself in a few seconds and exports per-card win-rate / play-rate stats so I can iterate on card balance instead of guessing. This runs nightly on CI.",
+        ],
+      },
+      {
+        type: 'paragraph',
+        text:
+          "There's also a **Roblox port of the engine** in Luau, sharing the same perft-validated move generator (1 / 20 / 400 / 8902 through depth 3) and a 16/20 implementation of the cards, as a graybox 3D place with [`SurfaceGui`](https://create.roblox.com/docs/reference/engine/classes/SurfaceGui) card hands and a classic-noob bot avatar standing behind one of the panels. Both ports read their card definitions from the same canonical JSON file.",
+      },
+      {
+        type: 'paragraph',
+        text:
+          "If you want the short version: jump to [the prototyping rule of thumb](#pick-the-easiest-prototype-first) for the only generalizable lesson here, or [the patterns worth stealing](#steal-these-patterns) for the reusable code. Otherwise read on — the rest is the iteration loop, the cards, the engine, and the bot that lives in a Roblox place wearing a noob skin.",
+      },
+
+      { type: 'rule' },
+
+      // -----------------------------------------------------------------
+      // Pick the easiest prototype first — the admonition the user
+      // explicitly asked to be called out in the post.
+      // -----------------------------------------------------------------
+      { type: 'heading', level: 2, text: 'Pick the easiest prototype first' },
+      {
+        type: 'paragraph',
+        text:
+          "Before any code got written, I went through a bunch of versions of *what \"chess plus randomness\" could even look like*. Some made it as far as a notebook page. A couple got as far as a half-baked prototype:",
+      },
+      {
+        type: 'list',
+        items: [
+          "**A deck-builder.** Each player drafts a small deck before the game and plays cards from it as it's drawn. Maybe even with shared random commons in a draft pool. Cool — but it's a *whole second game* on top of chess, with deck-building UI, draft logic, hidden information rules, all before you've moved a pawn.",
+          "**A modifier on every piece, by default.** Every piece on the board gets a random per-game perk: *this knight can also move one extra square diagonally,* or *this rook can phase through one piece per game*. Beautiful in concept. Brutal to balance — you'd have to make sure every random combination of starting modifiers is at least playable, and the search space is gigantic.",
+          "**Cards in hand, drawn from a shared deck, played before a chess move.** Two cards in your hand at any time. Each card is one effect. Capture-triggered draws so the back-and-forth pace stays interesting. No deck-building, no per-piece RNG, no hidden information beyond *\"what cards do they have right now?\"*.",
+        ],
+      },
+      {
+        type: 'paragraph',
+        text:
+          "The third one is what Super Chess is. Not because it's the most interesting of the three — honestly, the per-piece modifier idea is the one I'd most want to *play* — but because it was the **easiest one to actually ship**.",
+      },
+      {
+        type: 'callout',
+        variant: 'tip',
+        title: 'Tip — pick the easiest prototype first',
+        body: [
+          "When you have lots of ideas (and I always have too many, never too few), the right thing to build first is almost never the most exciting version. It's the one with the **fewest moving parts** that still tests the core question. You can add complexity later. You can't take time back.",
+          "For Super Chess the core question was *\"do cards-on-top-of-chess feel good?\"* — a question I could answer with two cards, one chess engine, and a button that says *\"play card.\"* Drafting, deck-building, per-piece modifiers, all of that can come back later if the core idea works. Start simple. Ship the boring version. Iterate from there.",
+        ],
+      },
+
+      { type: 'rule' },
+
+      // -----------------------------------------------------------------
+      // What Super Chess actually is — rules + card table
+      // -----------------------------------------------------------------
+      { type: 'heading', level: 2, text: 'What Super Chess actually is' },
+      {
+        type: 'paragraph',
+        text:
+          "Mechanically, it's standard chess — board, pieces, legal moves, check, checkmate, stalemate, castling, en passant, promotion, the 50-move rule. The card layer sits on top, and the rules are short:",
+      },
+      {
+        type: 'list',
+        items: [
+          "There's **one shared deck across both players** (so the *opponent* can play the card you really wanted, and that's part of the game).",
+          "Each player **holds up to two cards**, drawn from the top of the deck.",
+          "On your turn, **you may play one card before your chess move**. A handful of cards are *post*-phase (defensive: Shield, Freeze, Foul Ground), and a handful (Pawn Storm, Mirror, Time Warp) **replace** your chess move entirely.",
+          "**Capturing a piece draws a card.** That's the only card-draw trigger; white skips its first draw to offset the first-move advantage. Take a piece, get a card. The whole pace of the game is structured around this loop.",
+        ],
+      },
+      { type: 'heading', level: 3, text: 'The default deck' },
+      {
+        type: 'paragraph',
+        text:
+          "The current default deck is **six cards**, all common, all categorized `default` in the canonical [`super-chess.json`](https://github.com/BitwiseAndrea/super-chess/blob/master/src/data/super-chess.json). They're the set I felt most confident dropping straight into a real game without further playtesting — small, legible effects with bounded interactions.",
+      },
+      {
+        type: 'table',
+        caption:
+          "The default deck. All common, all in active rotation. Played before a chess move (or, for the post-phase ones, after).",
+        columns: [
+          { key: 'card', label: 'Card' },
+          { key: 'effect', label: 'Effect' },
+        ],
+        rows: [
+          { card: '❄️ **Freeze**', effect: "Freeze an opponent's piece for 1 turn." },
+          { card: '🛡️ **Shield**', effect: 'Protect one of your pieces from capture for 1 turn.' },
+          { card: '⛔ **Foul Ground**', effect: 'Opponent cannot move to the chosen empty square next turn.' },
+          { card: '👟 **Double Step**', effect: 'Move any pawn exactly 2 squares forward (uses your whole turn).' },
+          { card: '↩️ **Pawn Retreat**', effect: 'Move one of your pawns 1 square backward, straight or diagonal (uses your whole turn).' },
+          { card: '↗️ **Sidestep**', effect: 'Move one of your pawns 1 square diagonally forward, no capture (uses your whole turn).' },
+        ],
+      },
+      {
+        type: 'paragraph',
+        text:
+          "Every card in that table is one entry in [`super-chess.json`](https://github.com/BitwiseAndrea/super-chess/blob/master/src/data/super-chess.json), which is the **single source of truth** for both the TypeScript engine and the Luau Roblox port. Edit it once; both runtimes pick up the change.",
+      },
+      {
+        type: 'details',
+        summary: 'The other 16 cards: created but currently experimental →',
+        body: [
+          {
+            type: 'paragraph',
+            text:
+              "Sixteen more cards live in the registry, organized by `category`: **movement** (knight-jumps, teleports, swaps, retreats), **disruption** (must-move-this-piece-type, fog of war), **power** (Coup, Resurrection), and **chaos** (Mirror, Trade, Time Warp). They're fully implemented in the TS engine — the simulator can play them, the bot can score them — but they're not in the default deck yet because each one materially changes how the game flows, and the playtesting budget for *\"is rewinding two plies actually fun?\"* is its own project.",
+          },
+          {
+            type: 'table',
+            caption:
+              "Implemented and runnable today via the simulator's card-override config. Not part of the default deck while balance work continues.",
+            columns: [
+              { key: 'card', label: 'Card' },
+              { key: 'category', label: 'Category' },
+              { key: 'effect', label: 'Effect' },
+            ],
+            rows: [
+              { card: "♞ **Knight's Path**", category: 'Movement', effect: 'Any piece moves like a knight this turn.' },
+              { card: '⚡ **Extra Move**', category: 'Movement', effect: 'Take an additional (non-capturing) chess move this turn.' },
+              { card: '🌀 **Teleport**', category: 'Movement', effect: 'Move one of your pieces to any empty square.' },
+              { card: '🌊 **Pawn Storm**', category: 'Movement', effect: 'Advance every legal pawn one square (entire turn).' },
+              { card: '🚀 **Promotion Rush**', category: 'Movement', effect: 'Rush one pawn to the rank just before promotion.' },
+              { card: '👻 **Ghost Step**', category: 'Movement', effect: 'One piece phases through blockers this turn.' },
+              { card: '🔄 **Swap**', category: 'Movement', effect: 'Swap the positions of any two of your own pieces.' },
+              { card: '🏰 **Fortify**', category: 'Movement', effect: 'One pawn moves like a rook this turn.' },
+              { card: '↩️ **Retreat**', category: 'Movement', effect: 'Move one of your pieces backward up to 2 squares.' },
+              { card: '🎯 **Disrupt**', category: 'Disruption', effect: 'Opponent must move a piece of the named type next turn.' },
+              { card: '🌫️ **Fog**', category: 'Disruption', effect: 'Opponent must pre-declare their next move before you move.' },
+              { card: '💥 **Coup**', category: 'Power', effect: 'Remove any reachable opponent piece (not the king).' },
+              { card: '✨ **Resurrection**', category: 'Power', effect: 'Return your most recently captured minor piece to the board.' },
+              { card: '🪞 **Mirror**', category: 'Chaos', effect: "Copy your opponent's last move with one of your pieces (entire turn)." },
+              { card: '🤝 **Trade**', category: 'Chaos', effect: "Swap your most-advanced pawn with the opponent's least-advanced pawn." },
+              { card: '⏪ **Time Warp**', category: 'Chaos', effect: "Undo your last move + opponent's response. Once per game per player." },
+            ],
+          },
+          {
+            type: 'paragraph',
+            text:
+              "Any of these can be enabled in a sim run by editing `src/config/cards.config.ts` to bump their `copies` above zero — useful for stress-testing the engine and seeing histograms shift in the nightly sim before committing to inclusion in the default deck.",
+          },
+        ],
+      },
+
+      { type: 'rule' },
+
+      // -----------------------------------------------------------------
+      // The engine
+      // -----------------------------------------------------------------
+      { type: 'heading', level: 2, text: 'The engine had to be a real chess engine first' },
+      {
+        type: 'paragraph',
+        text:
+          "I cannot stress enough that the *boring* part of building Super Chess was building a real chess engine. The card layer is interesting; the chess engine underneath has to be **plain, correct, and fast** before anything else gets to be true. None of the card effects are testable until move generation is correct. None of the simulator's win-rates are meaningful until the bot can actually play chess.",
+      },
+      {
+        type: 'paragraph',
+        text:
+          "So before any cards got written, the first milestone was passing a **perft test** — Performance Test, the chess-engine community's standard way of asserting that your move generator emits exactly the right legal moves at every depth from a given position. The numbers are well-known and brittle. Get them wrong, the engine is wrong:",
+      },
+      {
+        type: 'code',
+        language: 'typescript',
+        code:
+`// Perft from the standard initial position. Both the TS engine and the
+// Luau Roblox engine produce these exact counts. If a code change makes
+// any of these wiggle, move generation has regressed.
+perft(1) === 20      // 20 legal first moves for white
+perft(2) === 400     // 20 white * 20 black replies
+perft(3) === 8902    // the all-the-rules-must-be-right number`,
+      },
+      {
+        type: 'callout',
+        variant: 'fun-fact',
+        title: 'Fun fact',
+        body: [
+          "Once you cross perft(3) = 8902 cleanly, you'd think the rest is downhill. It is not. perft(4) is **197,281** and any bug — castling rights, en passant capture detection, promotion edge cases — explodes the difference into the thousands. Most chess-engine bug stories are *\"the perft was off by 11 and tracking down the 11 took two days.\"* Super Chess only validates through perft(3) on CI because the card layer doesn't change move generation; depth 3 is enough to catch every regression I've ever introduced.",
+        ],
+      },
+      {
+        type: 'paragraph',
+        text:
+          "Above the move generator sits a textbook search: **negamax with alpha-beta pruning**, capture-first move ordering, and a **quiescence** layer at the leaves so the bot doesn't stop evaluating in the middle of a capture sequence and call a +9 position +0. Evaluation is material plus piece-square tables — also stored in `super-chess.json`, also shared with the Roblox port. At depth 2 the bot averages around **6 ms/move**; at depth 3, around 60 ms. Both are real-time.",
+      },
+
+      { type: 'rule' },
+
+      // -----------------------------------------------------------------
+      // The simulator
+      // -----------------------------------------------------------------
+      { type: 'heading', level: 2, text: '500 games a night, no clicking' },
+      {
+        type: 'paragraph',
+        text:
+          "Here's where the project earns its keep. Once you have a chess engine and a card layer, the obvious question is *\"is this card overpowered?\"* and the *obvious wrong answer* is *\"play 50 games and see how it feels.\"* I am not going to play 50 games of anything to balance a card. I am barely going to play **one** game.",
+      },
+      {
+        type: 'paragraph',
+        text:
+          "So the same bundle that powers the playable simulator also exposes a **CLI batch runner** that plays N games of bot-vs-bot, with both sides using the heuristic Card AI on top of the chess bot, and writes per-card statistics to disk:",
+      },
+      {
+        type: 'code',
+        language: 'bash',
+        code:
+`# 500 games at depth 2, save the structured results to disk.
+pnpm sim --games 500 --depth 2 --output sim-results/run.json
+
+# Export those results into something I can read.
+pnpm export-stats --input sim-results/run.json --format markdown
+pnpm export-stats --input sim-results/run.json --format csv
+
+# What "good" looks like for a card in the output:
+#   play_rate     - how often did the bot CHOOSE to play this card when held?
+#   win_rate      - when this card was played, how often did its side win?
+#   avg_material  - average centipawn delta the card produced when played`,
+      },
+      {
+        type: 'paragraph',
+        text:
+          "Then **GitHub Actions runs a 500-game simulation nightly** at 02:00 UTC, generates a Markdown report, and posts it as a comment on issue #1 on the repo. Every morning I get a fresh balance snapshot in my notifications. If a card's `play_rate` quietly drops to ~0%, the heuristic Card AI has decided it's not worth playing — that's almost always a balance bug, and now I see it the next morning instead of three months later when I notice no one ever plays Trade.",
+      },
+      {
+        type: 'callout',
+        variant: 'tip',
+        title: 'Tip — bots playing themselves is the cheapest playtest you have',
+        body: [
+          "If your game has a deterministic-enough rules system that you can write *any* heuristic AI for it, you can run thousands of self-play games for free, every night, and look at the histograms in the morning. The bot doesn't have to be *good* — it has to be **consistent**. The signal lives in *how the histogram changes when you tweak a card*, not in any individual game's outcome.",
+        ],
+      },
+
+      { type: 'rule' },
+
+      // -----------------------------------------------------------------
+      // The card abstraction — the mega refactor
+      // -----------------------------------------------------------------
+      { type: 'heading', level: 2, text: 'The card abstraction (now in one file)' },
+      {
+        type: 'paragraph',
+        text:
+          "The first version of the card system was, candidly, **AI slop**. I'd been letting the agent ship cards faster than I'd been reading the code, and by the time I sat down and actually opened the files, adding one new card meant editing **five of them**: `super-chess.json` (the metadata), `effects.ts` (the apply function), `cardAI.ts` (the bot's scoring heuristic), `targeting.ts` (the UI highlight rules), and sometimes `game/types.ts` (if the card needed long-running state). A community-submitted card was effectively impossible — you'd have to merge a PR that touched the core type system to add a single effect.",
+      },
+      {
+        type: 'paragraph',
+        text:
+          "Sitting down with that mess turned out to be one of the more *fun* afternoons of the project. Years ago, before I was a manager, I was a teaching assistant for the intro OOP course at my university — the one where you finally explain inheritance and polymorphism to a room of second-years and watch the *\"oh, **that's** what classes are for\"* face go off in real time. Those muscles haven't been exercised in many, many years. Refactoring 20 cards into a registered-object API with one shared interface and a sparse-state side-table is exactly the worked example I used to draw on the whiteboard, just with snowflake emojis instead of `Animal -> Dog`.",
+      },
+      {
+        type: 'paragraph',
+        text:
+          "After the rewrite, a card is **one self-contained file**:",
+      },
+      {
+        type: 'code',
+        language: 'typescript',
+        code:
+`// src/cards/builtin/freeze.ts
+import type { Card } from '../card.ts';
+import { cloneState } from '../card.ts';
+import {
+  CardCategory, CardDuration, CardRarity, CardTargetType, TurnPhase,
+} from '../types.ts';
+import { PieceType, opponent, pieceType } from '../../engine/index.ts';
+
+export const freezeCard: Card = {
+  def: {
+    name: 'Freeze',
+    rarity: CardRarity.Common,
+    category: CardCategory.Default,
+    copies: 3,
+    emoji: '\u2744\ufe0f',
+    shortDesc: "Freeze an opponent's piece for 1 turn.",
+    rulesText:
+      "Choose one of your opponent's pieces (not the king). That piece cannot " +
+      "move on the opponent's next turn. Frozen pieces can still be captured.",
+    requiresTarget: true,
+    targetType: CardTargetType.OppPiece,
+    phase: TurnPhase.Post,
+    duration: CardDuration.OppTurn,
+  },
+
+  apply(state, color, target) {
+    const sq = target.oppPieceSquare;
+    const p  = sq !== undefined ? state.chess.board[sq] : null;
+    if (!p)                              return reject(state, 'invalid target');
+    if (pieceType(p) === PieceType.King) return reject(state, 'cannot freeze king');
+
+    const next = cloneState(state);
+    // 1 ply = "active during exactly the opponent's upcoming ply, gone
+    // before our next turn starts". Setting 2 leaked into our turn.
+    next.superState.frozenSquares.set(sq, 1);
+    return { newState: next, logEntry: \`Froze \${sqStr(sq)}\`, materialDelta: 0 };
+  },
+
+  // Single source of truth used by both the UI highlighter and the bot's
+  // simulate-and-score loop. Without this, the bot never plays Freeze.
+  legalTargets(state, color) {
+    return enumerateOpponentNonKingPieces(state, opponent(color));
+  },
+};`,
+      },
+      {
+        type: 'paragraph',
+        text:
+          "Long-running effects (Shield, Freeze, Foul Ground, Mirror's mirror-state) used to require touching the `SuperState` type. Now they live in a typed namespace I called `cardState` — a `Map<string, unknown>` where each card stashes its own state under its own key, with its own optional `tick(superState)` hook to expire it. The well-known counters that the engine itself cares about (`frozenSquares`, `shieldTurns`) keep their static types; community cards opt in to the dynamic bag without touching the core types.",
+      },
+      {
+        type: 'paragraph',
+        text:
+          "**Adding a new card is now: write one file, register it once, you're done.** Both the bot and the UI route through the same registry. The full developer-facing doc lives at [`docs/AUTHORING_CARDS.md`](https://github.com/BitwiseAndrea/super-chess/blob/master/docs/AUTHORING_CARDS.md) in the repo.",
+      },
+
+      { type: 'rule' },
+
+      // -----------------------------------------------------------------
+      // Roblox port
+      // -----------------------------------------------------------------
+      { type: 'heading', level: 2, text: 'The Roblox port — same engine, different runtime' },
+      {
+        type: 'paragraph',
+        text:
+          "Once the TS engine had a card system worth porting, the obvious next move was to reproduce it in **Luau** as a Roblox place. Not because Roblox is the right *platform* for a chess game (it isn't), but because the engine + cards form a self-contained chunk of game logic that I wanted to know would survive being ported to a totally different runtime — and because a graybox 3D chess board with a little bot avatar standing next to it is, frankly, very cute.",
+      },
+      {
+        type: 'paragraph',
+        text:
+          "Both engines read their card definitions, piece values, piece-square tables, and rule constants (max hand size, max moves per game) from the same canonical JSON: `public/super-chess.json`. A `pnpm cards:sync` script regenerates a Luau-embedded snapshot of that JSON whenever it changes, so the Roblox runtime can boot offline with the latest data. There's also an optional [`HttpService`](https://create.roblox.com/docs/reference/engine/classes/HttpService) boot-fetch path so the place can pull the live JSON if the developer wires it up.",
+      },
+      {
+        type: 'paragraph',
+        text:
+          "The validation that mattered most was **bit-identical perft** between the two engines:",
+      },
+      {
+        type: 'code',
+        language: 'luau',
+        code:
+`-- Both engines, from the standard initial position, must produce exactly:
+perft(1) -> 20
+perft(2) -> 400
+perft(3) -> 8902
+
+-- This is non-negotiable. If they diverge, one of the two move generators
+-- has a bug, and any cross-runtime game is going to behave differently
+-- when one card cares about a move-generation edge case the other doesn't.`,
+      },
+      {
+        type: 'paragraph',
+        text:
+          "16 of the 20 cards are implemented in the Luau port (Mirror, Trade, Fog, and Time Warp ship as placeholders that explicitly say *NOT IMPLEMENTED* on the card so you can see the gap from inside the place). The 3D presentation is pure graybox: 64 [`Part`](https://create.roblox.com/docs/reference/engine/classes/Part)s for the squares with [`ClickDetector`](https://create.roblox.com/docs/reference/engine/classes/ClickDetector)s and [`SelectionBox`](https://create.roblox.com/docs/reference/engine/classes/SelectionBox)es, primitive cylinders and blocks for pieces, two `SurfaceGui` panels for the hands, and an R6 **classic-noob avatar standing behind the black hand panel** that crossfades between built-in idle / wave / cheer / laugh emote tracks based on game state. There's a [`BillboardGui`](https://create.roblox.com/docs/reference/engine/classes/BillboardGui) chat bubble above its head that says things like *\"hmm…\"* / *\"your move\"* / *\"GG!\"* / *\"oof\"* depending on whether it's thinking, waiting, celebrating, or losing.",
+      },
+      {
+        type: 'paragraph',
+        text:
+          "The bot's pacing is deliberate: pre-delay 0.6 s, minimum think time 1.0 s, post-settle 0.2 s, with the StatusBoard text cycling *\"Black is thinking\"* / *\"..thinking.\"* / *\"..thinking..\"* / *\"..thinking…\"* every 0.3 s and a gold [`UIStroke`](https://create.roblox.com/docs/reference/engine/classes/UIStroke) pulse around the bot's hand panel. None of that pacing is necessary — the bot is fast enough that a depth-2 move comes back in under 10 ms — but a chess move that snaps back instantly feels like a glitch, not a turn.",
+      },
+
+      { type: 'rule' },
+
+      // -----------------------------------------------------------------
+      // Bug reports → Trello
+      // -----------------------------------------------------------------
+      { type: 'heading', level: 2, text: 'Bug reports straight into Trello' },
+      {
+        type: 'paragraph',
+        text:
+          "When you ship a thing with **20 cards x all chess legal positions**, the bug surface is meaningfully bigger than \"games sometimes crash.\" Most of the bugs I find now are subtle interactions between two cards in a specific position — *\"if I Shield this piece on this turn and you Coup it next turn, what should happen?\"* — and there's no useful way to write that down without a snapshot of the exact state.",
+      },
+      {
+        type: 'paragraph',
+        text:
+          "So there's a 🐞 bug-report button at the top of the play panel. It captures a full game snapshot — board FEN, both hands, the entire `superState` (frozen squares, shields, foul ground, etc), recent events, validation result, and a session debug log — and gives the user three ways to get it off their machine: *Send to Trello*, *Copy report*, *Download .json*.",
+      },
+      {
+        type: 'paragraph',
+        text:
+          "The *Send to Trello* path posts to a Cloudflare Worker route at `POST /api/bug-report` that calls the Trello REST API server-side. The Trello API key and token live in `wrangler` secrets and **never touch the client bundle**. The Worker per-IP-rate-limits the route to 3 requests / minute via the Cloudflare rate-limit binding, clamps title to 120 chars and description to ~14 KiB, and otherwise falls through to the static SPA via `env.ASSETS.fetch`.",
+      },
+      {
+        type: 'callout',
+        variant: 'tip',
+        title: 'Tip — never ship API tokens in your client bundle',
+        body: [
+          "If your client needs to talk to a third-party API that requires a credential, **proxy through your own server**. Cloudflare Workers makes this almost free — one route, one secret, one rate-limit binding, and the client only ever sees your origin. The same pattern works for posting to Slack, hitting Discord webhooks, or any *\"please don't put this in JavaScript\"* REST API.",
+        ],
+      },
+
+      { type: 'rule' },
+
+      // -----------------------------------------------------------------
+      // Where it lives
+      // -----------------------------------------------------------------
+      { type: 'heading', level: 2, text: 'Where it lives' },
+      {
+        type: 'paragraph',
+        text:
+          "The web app is a Vite SPA served from a Cloudflare Worker via `assets`. Custom domain at [super-chess.bitwiseandrea.com](https://super-chess.bitwiseandrea.com), wired to the `bitwiseandrea.com` zone. CI runs lint + tests on every push, and the nightly sim job posts its 500-game balance report as a comment on issue #1 of the repo.",
+      },
+      {
+        type: 'paragraph',
+        text:
+          "The Roblox place lives in a Studio session called *Super Chess*, with all the engine code under `ReplicatedStorage/SuperChess/Modules/*` and the world built procedurally on server boot — board, hand panels, status board, lights, and the noob bot avatar are all spawned by `WorldBuilder.lua`, not hand-placed in Studio. Editing the place mostly means editing module scripts and pressing Play.",
+      },
+
+      { type: 'rule' },
+
+      // -----------------------------------------------------------------
+      // What's next
+      // -----------------------------------------------------------------
+      { type: 'heading', level: 2, text: "What's next" },
+      {
+        type: 'list',
+        items: [
+          "**Multiplayer.** The web sim is currently single-player + bot only. There's a partial multiplayer prototype in `git log` (the *\"Multiplayer?\"* commit and its three follow-ups) — the move sync works; the card draw/state sync does not yet survive a refresh.",
+          "**Mobile.** Some recent commits make the touch layout *bearable*, but the card hand panels still want a dedicated mobile-first layout with bigger touch targets. The Roblox port already works on mobile by default.",
+          "**Closing the 4-card gap in Luau.** Mirror, Trade, Fog, and Time Warp need their effects ported. Mirror and Time Warp are the interesting ones — both involve serializing prior game states for replay/restore.",
+          "**Drafting and deck-building modes** (the iteration ideas I deliberately deferred above). The card registry makes this *much* easier to ship now than it would have been in version 1.",
+        ],
+      },
+
+      { type: 'rule' },
+
+      // -----------------------------------------------------------------
+      // Steal these patterns
+      // -----------------------------------------------------------------
+      { type: 'heading', level: 2, text: 'Steal these patterns' },
+      {
+        type: 'paragraph',
+        text:
+          "The reusable shapes from this build, with links back to where each one is discussed:",
+      },
+      {
+        type: 'list',
+        items: [
+          "**Pick the easiest prototype that still tests the core question.** Defer the cool ideas until the boring version is shipped. [Where this is shown ↑](#pick-the-easiest-prototype-first)",
+          "**A perft-style test before anything else.** If you're building any rules-system game, find the equivalent — a deterministic legality check that exercises every edge case in your rules — and make it green before you build anything on top. [Where this is shown ↑](#the-engine-had-to-be-a-real-chess-engine-first)",
+          "**One canonical JSON that both runtimes read.** Card definitions, piece values, PSTs, rule constants — all in `public/super-chess.json`, regenerated into a Luau snapshot on demand. Edit once, both runtimes pick up the change. [Where this is shown ↑](#the-roblox-port-same-engine-different-runtime)",
+          "**One file per card; register it once.** A registry-based plugin API means new cards (and community cards) don't have to touch the core type system. [Where this is shown ↑](#the-card-abstraction-now-in-one-file)",
+          "**A `cardState` namespace** for long-running per-card state. `Map<string, unknown>` with optional `tick()` hooks; the typed core engine state stays typed. [Where this is shown ↑](#the-card-abstraction-now-in-one-file)",
+          "**Bots playing themselves on a nightly cron** is the cheapest playtest you have. Watch the histograms, not the individual games. [Where this is shown ↑](#500-games-a-night-no-clicking)",
+          "**Proxy third-party APIs through your own server.** A tiny Cloudflare Worker route + secrets keeps your API tokens out of the client bundle and earns you free rate-limiting. [Where this is shown ↑](#bug-reports-straight-into-trello)",
+        ],
+      },
+      {
+        type: 'paragraph',
+        text:
+          "If you want the long version of any of these, scroll back up — they're in context with the surrounding story for why they ended up looking the way they do.",
+      },
+
+      { type: 'rule' },
+
+      // -----------------------------------------------------------------
+      // Resources
+      // -----------------------------------------------------------------
+      { type: 'heading', level: 2, text: 'Resources' },
+      {
+        type: 'list',
+        items: [
+          "[github.com/BitwiseAndrea/super-chess](https://github.com/BitwiseAndrea/super-chess) — the repo. Web project lives at the root; the Luau port lives under `roblox/`.",
+          "[super-chess.bitwiseandrea.com](https://super-chess.bitwiseandrea.com) — the live web sim. Click *Play* to play vs the bot; *Simulate* to run a batch sim in the browser.",
+          "[`docs/AUTHORING_CARDS.md`](https://github.com/BitwiseAndrea/super-chess/blob/master/docs/AUTHORING_CARDS.md) — the developer-facing doc for the Card registry. If you want to write your own card and PR it, start here.",
+          "[Chess Programming Wiki — Perft](https://www.chessprogramming.org/Perft) — the standard reference for chess engine move-generation validation. The numbers I'm matching live here.",
+          "[Chess Programming Wiki — Quiescence Search](https://www.chessprogramming.org/Quiescence_Search) — the trick for not stopping evaluation in the middle of a capture sequence. Without this, a chess bot is just *bad*.",
+        ],
+      },
+    ],
   },
 
   // ---------------------------------------------------------------------------

@@ -30,31 +30,35 @@ export default function MountainsLayer() {
         mixTint(plan.mountainTint, 0.65),
         plan.mountainTint,
       ];
+      // When the ocean is showing (Daylight scene), fade the mountains
+      // out so the foreground reads as a water surface rather than land.
+      const baseOpacities = [0.7, 0.88, 1.0];
+      const mountainAlpha = 1 - (plan.oceanAmount || 0);
       refs.forEach((el, i) => {
         const dy = plan.mountainShift * shifts[i];
         el.style.transform = `translate3d(0, ${dy}vh, 0)`;
         el.style.color = tints[i];
+        el.style.opacity = `${baseOpacities[i] * mountainAlpha}`;
       });
     });
   }, []);
 
   return (
     <div className="layer mountains-layer" aria-hidden="true">
-      <Silhouette innerRef={farRef}  className="mountains__far"  d={PATHS.far}  opacity={0.7} />
-      <Silhouette innerRef={midRef}  className="mountains__mid"  d={PATHS.mid}  opacity={0.88} />
-      <Silhouette innerRef={nearRef} className="mountains__near" d={PATHS.near} opacity={1.0} />
+      <Silhouette innerRef={farRef}  className="mountains__far"  d={PATHS.far} />
+      <Silhouette innerRef={midRef}  className="mountains__mid"  d={PATHS.mid} />
+      <Silhouette innerRef={nearRef} className="mountains__near" d={PATHS.near} />
     </div>
   );
 }
 
-function Silhouette({ innerRef, className, d, opacity }) {
+function Silhouette({ innerRef, className, d }) {
   return (
     <svg
       ref={innerRef}
       className={`mountains ${className}`}
       viewBox="0 0 1440 320"
       preserveAspectRatio="none"
-      style={{ opacity }}
     >
       <path d={d} fill="currentColor" />
     </svg>

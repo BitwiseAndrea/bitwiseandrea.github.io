@@ -42,6 +42,7 @@
 //   { type: 'code',      language?, code }
 //   { type: 'list',      ordered?: false, items: [string] }
 //   { type: 'table',     caption?, columns: [{ key, label }], rows: [{ [key]: text }] }
+//   { type: 'details',   summary, body: [ContentBlock] }   // collapsible <details> element
 //   { type: 'rule' }
 //
 // Inline markdown supported inside `text`/`caption`/list items:
@@ -76,6 +77,8 @@ const SHIKI_THEME_NAME = 'vitesse-dark';
 // grammars no post is using.
 const LANG_LOADERS = {
   luau: () => import('@shikijs/langs/luau').then((m) => m.default),
+  typescript: () => import('@shikijs/langs/typescript').then((m) => m.default),
+  bash: () => import('@shikijs/langs/bash').then((m) => m.default),
 };
 
 let highlighterPromise = null;
@@ -409,6 +412,19 @@ function ContentBlock({ block }) {
         </div>
       );
     }
+    case 'details':
+      return (
+        <details className="post__details">
+          <summary className="post__details-summary">
+            <InlineMarkdown text={block.summary} />
+          </summary>
+          <div className="post__details-body">
+            {(block.body ?? []).map((child, i) => (
+              <ContentBlock key={i} block={child} />
+            ))}
+          </div>
+        </details>
+      );
     case 'rule':
       return <hr className="post__rule" aria-hidden="true" />;
     default:

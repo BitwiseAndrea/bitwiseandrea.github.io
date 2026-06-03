@@ -12,7 +12,10 @@ import React, { useEffect, useRef } from 'react';
 import { subscribe } from '../lib/scrollState.js';
 
 const MAX_DROPS = 280;
-const BASE_INTENSITY = 0.05;
+// Resting intensity is 0 so rain only falls when scrollPlan asks for it
+// (during the storm + sunset moments). Cursor flicks still add a small,
+// momentary boost on top of whatever the plan currently dictates.
+const BASE_INTENSITY = 0.0;
 
 export default function RainCursorCanvas() {
   const canvasRef = useRef(null);
@@ -93,8 +96,10 @@ export default function RainCursorCanvas() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (!reducedMotion) {
-        const moveBoost = Math.min(8, Math.hypot(mouse.vx, mouse.vy) * 0.18);
-        const rate = 0.2 + i * 7.5 + moveBoost;
+        // Cursor-flick "splash" only contributes when there's already weather
+        // to splash from — a flick on a clear morning shouldn't summon rain.
+        const moveBoost = Math.min(8, Math.hypot(mouse.vx, mouse.vy) * 0.18) * Math.min(1, i * 4);
+        const rate = i * 7.5 + moveBoost;
         let toSpawn = rate;
         while (toSpawn > 0) {
           if (Math.random() < toSpawn) spawn(i);
