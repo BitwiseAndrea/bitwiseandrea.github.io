@@ -83,13 +83,17 @@ export default function App() {
     return undefined;
   }, [constellationOpen, lenisRef]);
 
-  const openConstellations = useCallback(() => setConstellationOpen(true), []);
+  // Single handler for the moon-hotspot: it doubles as both the "open"
+  // and "close" trigger so the centered moon stays clickable.
+  const toggleConstellations = useCallback(() => {
+    setConstellationOpen((prev) => !prev);
+  }, []);
   const closeConstellations = useCallback(() => setConstellationOpen(false), []);
 
   return (
     <div className={`app-root${constellationOpen ? ' constellation-open' : ''}`}>
       <SkyLayer />
-      <CelestialLayer onMoonClick={openConstellations} />
+      <CelestialLayer onMoonClick={toggleConstellations} frozen={constellationOpen} />
       <SunRaysLayer />
       <MountainsLayer />
       <OceanLayer />
@@ -116,7 +120,7 @@ export default function App() {
         </footer>
       </main>
 
-      <MoonHotspot onClick={openConstellations} />
+      <MoonHotspot onClick={toggleConstellations} frozen={constellationOpen} />
       <CustomCursor />
       <ConstellationOverlay open={constellationOpen} onClose={closeConstellations} />
       <IntroCurtain onComplete={releaseScroll} />

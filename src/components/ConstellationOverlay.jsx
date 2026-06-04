@@ -180,24 +180,12 @@ export default function ConstellationOverlay({ open, onClose }) {
         ))}
       </svg>
 
-      {/* Centered moon — a clickable button that closes the overlay. */}
-      <button
-        type="button"
-        className="constellation-moon"
-        onClick={onClose}
-        aria-label="Close constellations"
-        aria-hidden={!open}
-        tabIndex={open ? 0 : -1}
-      >
-        <span className="constellation-moon__halo" />
-        <span className="constellation-moon__body">
-          <span style={{ left: '24%', top: '38%', width: '18%', height: '18%' }} />
-          <span style={{ left: '58%', top: '26%', width: '10%', height: '10%' }} />
-          <span style={{ left: '52%', top: '60%', width: '14%', height: '14%' }} />
-          <span style={{ left: '32%', top: '70%', width: '8%',  height: '8%'  }} />
-          <span style={{ left: '70%', top: '52%', width: '6%',  height: '6%'  }} />
-        </span>
-      </button>
+      {/*
+        We deliberately don't render a moon here — the real celestial body
+        in CelestialLayer animates to center while this overlay fades in,
+        so users see the actual moon glide into place rather than a
+        cross-fade between two moons.
+      */}
 
       <p className="constellation-hint">
         click the moon · or press <kbd>esc</kbd>

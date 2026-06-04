@@ -12,11 +12,30 @@
 import React, { useEffect, useRef } from 'react';
 import { subscribe, getScrollState } from '../lib/scrollState.js';
 
-export default function CelestialLayer({ onMoonClick }) {
+// Diameter (as a fraction of min(viewportW, viewportH)) the moon snaps to
+// when the constellation easter egg is open. Slightly larger than the
+// constellation-overlay's old static moon so the centering animation
+// reads as a real movement.
+const CENTERED_MOON_VMIN = 0.32;
+
+export default function CelestialLayer({ onMoonClick, frozen = false }) {
   const wrapRef = useRef(null);
   const bodyRef = useRef(null);
   const haloRef = useRef(null);
   const craterRef = useRef(null);
+
+  // The frozen state is read inside the scroll-state subscription, so we
+  // mirror it through a ref to avoid having to resubscribe on every toggle.
+  const frozenRef = useRef(frozen);
+  // Imperative re-apply hook: the frozen toggle effect calls this so the
+  // celestial body re-positions itself immediately when the prop flips.
+  const applyRef = useRef(null);
+  // Tracks whether we've already done the initial mount apply. The first
+  // run shouldn't animate — there's no "previous" position to glide from.
+  const hasMountedRef = useRef(false);
+  // The currently-running open/close animation, so we can cancel it if the
+  // user toggles again before the previous one finishes.
+  const animRef = useRef(null);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -27,9 +46,22 @@ export default function CelestialLayer({ onMoonClick }) {
 
     const apply = ({ plan }) => {
       const viewportMin = Math.min(window.innerWidth, window.innerHeight);
-      const size = plan.sunSize * viewportMin;
-      const x = plan.sunX * window.innerWidth - size / 2;
-      const y = plan.sunY * window.innerHeight - size / 2;
+
+      // Choose between scroll-driven position and the centered easter-egg
+      // position. Visual style (color, halo, craters) always tracks the
+      // scroll plan so the moon keeps its current "look" while it moves.
+      let size;
+      let x;
+      let y;
+      if (frozenRef.current) {
+        size = viewportMin * CENTERED_MOON_VMIN;
+        x = window.innerWidth / 2 - size / 2;
+        y = window.innerHeight / 2 - size / 2;
+      } else {
+        size = plan.sunSize * viewportMin;
+        x = plan.sunX * window.innerWidth - size / 2;
+        y = plan.sunY * window.innerHeight - size / 2;
+      }
 
       wrap.style.transform = `translate3d(${x}px, ${y}px, 0)`;
       wrap.style.width = `${size}px`;
@@ -67,14 +99,72 @@ export default function CelestialLayer({ onMoonClick }) {
       }
     };
 
+    applyRef.current = () => apply({ plan: getCurrentPlan() });
     const unsub = subscribe(apply);
     const onResize = () => apply({ plan: getCurrentPlan() });
     window.addEventListener('resize', onResize);
     return () => {
+      applyRef.current = null;
       unsub();
       window.removeEventListener('resize', onResize);
     };
-  }, []);
+  }, [onMoonClick]);
+
+  // When `frozen` toggles, snapshot the moon's current position, write the
+  // new (centered or scroll-driven) position via apply(), then run a Web
+  // Animations API animation between the two snapshots. WAAPI is used here
+  // instead of CSS transitions because the class-toggle + style-mutation
+  // sequence wasn't reliably triggering CSS transitions across browsers.
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return undefined;
+
+    // Snapshot the inline values BEFORE we change frozenRef + re-apply.
+    const fromTransform = wrap.style.transform;
+    const fromWidth = wrap.style.width;
+    const fromHeight = wrap.style.height;
+
+    frozenRef.current = frozen;
+    if (applyRef.current) applyRef.current();
+
+    const toTransform = wrap.style.transform;
+    const toWidth = wrap.style.width;
+    const toHeight = wrap.style.height;
+
+    // First mount: nothing to glide from yet.
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return undefined;
+    }
+    // No actual change (e.g. StrictMode double-invoke landing on the same
+    // frozen value, or unset inline style on first call).
+    if (!fromTransform) return undefined;
+    if (
+      fromTransform === toTransform
+      && fromWidth === toWidth
+      && fromHeight === toHeight
+    ) {
+      return undefined;
+    }
+
+    if (animRef.current) animRef.current.cancel();
+    const anim = wrap.animate(
+      [
+        { transform: fromTransform, width: fromWidth, height: fromHeight },
+        { transform: toTransform, width: toWidth, height: toHeight },
+      ],
+      { duration: 900, easing: 'cubic-bezier(.22, .9, .26, 1)' },
+    );
+    animRef.current = anim;
+    anim.onfinish = () => {
+      if (animRef.current === anim) animRef.current = null;
+    };
+
+    return () => {
+      anim.cancel();
+      if (animRef.current === anim) animRef.current = null;
+    };
+  }, [frozen]);
 
   const handleClick = () => {
     if (!onMoonClick) return;
