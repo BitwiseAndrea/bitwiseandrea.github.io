@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#04050f" />
+    <meta
+      name="description"
+      content="Privacy policy for Stickers from Roblox, the companion iOS app that turns your Roblox avatar expressions into native iMessage stickers."
+    />
+    <meta property="og:title" content="Privacy Policy · Stickers from Roblox" />
+    <meta
+      property="og:description"
+      content="What data the Stickers from Roblox app collects (and doesn't), where it's stored, and how to revoke access."
+    />
+    <meta property="og:type" content="article" />
+    <title>Privacy Policy · Stickers from Roblox</title>
+    <style>
+      :root {
+        --bg: #04050f;
+        --fg: #e8e9ed;
+        --fg-dim: #9aa0b3;
+        --accent: #8c9eff;
+        --rule: rgba(255, 255, 255, 0.08);
+        --code-bg: rgba(255, 255, 255, 0.06);
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+          system-ui, sans-serif;
+        font-size: 16px;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+      .crumb {
+        max-width: 720px;
+        margin: 32px auto 0;
+        padding: 0 24px;
+        font-size: 13px;
+        color: var(--fg-dim);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .crumb a {
+        color: var(--fg-dim);
+        text-decoration: none;
+        border-bottom: 1px solid transparent;
+        transition: color 120ms, border-color 120ms;
+      }
+      .crumb a:hover { color: var(--fg); border-bottom-color: var(--rule); }
+      main {
+        max-width: 720px;
+        margin: 24px auto 96px;
+        padding: 0 24px;
+      }
+      h1 {
+        font-size: clamp(32px, 5vw, 44px);
+        margin: 24px 0 8px;
+        letter-spacing: -0.01em;
+        font-weight: 700;
+      }
+      h2 {
+        font-size: 20px;
+        margin: 48px 0 12px;
+        font-weight: 600;
+        color: var(--fg);
+      }
+      .updated {
+        color: var(--fg-dim);
+        font-size: 14px;
+        margin: 0 0 32px;
+      }
+      p, ul { margin: 0 0 16px; }
+      ul { padding-left: 22px; }
+      li { margin-bottom: 8px; }
+      a {
+        color: var(--accent);
+        text-decoration: none;
+        border-bottom: 1px solid rgba(140, 158, 255, 0.35);
+        transition: border-color 120ms;
+      }
+      a:hover { border-bottom-color: var(--accent); }
+      code {
+        background: var(--code-bg);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 13.5px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      strong { color: var(--fg); font-weight: 600; }
+      hr {
+        border: 0;
+        border-top: 1px solid var(--rule);
+        margin: 48px 0;
+      }
+      .footer {
+        color: var(--fg-dim);
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="crumb">
+      <a href="/">bitwiseandrea</a> · privacy policy
+    </div>
+    <main>
+      <h1>Privacy Policy</h1>
+      <p class="updated">Stickers from Roblox &mdash; last updated 2026&#8209;06&#8209;08</p>
+
+      <p>Stickers from Roblox is an iMessage sticker app that turns
+      your in-game Roblox avatar expressions into native iMessage
+      stickers. This page explains what data the app handles and
+      why.</p>
+
+      <h2>What we collect</h2>
+      <ul>
+        <li><strong>Your Roblox identity.</strong> When you tap
+        &ldquo;Sign in with Roblox&rdquo;, Roblox sends us your
+        <code>userId</code>, <code>username</code>,
+        <code>displayName</code>, and avatar thumbnail URL. We use
+        these solely to (a) greet you in the app, and (b) look up the
+        sticker packs you have already created in the companion
+        Roblox experience.</li>
+        <li><strong>Your sticker pack metadata and images.</strong>
+        The app reads sticker packs you have already saved to
+        Roblox&rsquo;s DataStore via the companion experience. We
+        fetch these on your behalf so they appear inside iMessage. We
+        do not modify or republish them.</li>
+      </ul>
+
+      <h2>What we do NOT collect</h2>
+      <ul>
+        <li>No analytics, telemetry, or crash reporting SDKs.</li>
+        <li>No advertising identifiers.</li>
+        <li>No contacts, photo library, location, or microphone
+        access.</li>
+        <li>No tracking across apps or websites.</li>
+      </ul>
+
+      <h2>Where data is stored</h2>
+      <ul>
+        <li><strong>On your device.</strong> Your Roblox access
+        tokens are stored in iOS Keychain. Your downloaded sticker
+        images and identity profile are stored in the app&rsquo;s
+        private App Group container. Both are deleted when you sign
+        out or uninstall the app.</li>
+        <li><strong>On our server.</strong> No per-user data is
+        persisted server-side. The Cloudflare Worker that backs this
+        app is a stateless proxy: it validates your Roblox token,
+        fetches your packs from Roblox&rsquo;s DataStore on each
+        request, and returns them. We do not log identifiable
+        request data beyond standard Cloudflare access logs (kept
+        for at most 30 days).</li>
+      </ul>
+
+      <h2>Third parties</h2>
+      <p>The app communicates with two third parties:</p>
+      <ul>
+        <li><strong>Roblox</strong> &mdash; for sign-in (OAuth 2.0)
+        and to read sticker pack data you have already saved there.
+        See <a href="https://www.roblox.com/info/privacy"
+        target="_blank" rel="noreferrer">Roblox&rsquo;s privacy
+        policy</a>.</li>
+        <li><strong>Cloudflare</strong> &mdash; the Worker that hosts
+        our backend runs on Cloudflare&rsquo;s global network. See
+        <a href="https://www.cloudflare.com/privacypolicy/"
+        target="_blank" rel="noreferrer">Cloudflare&rsquo;s privacy
+        policy</a>.</li>
+      </ul>
+      <p>We do not sell or share your data with any other third
+      party.</p>
+
+      <h2>Your rights</h2>
+      <p>You can revoke the app&rsquo;s access to your Roblox account
+      at any time from your Roblox account settings. Signing out of
+      the app clears all local data and tokens.</p>
+
+      <h2>Contact</h2>
+      <p>Questions: <a href="mailto:bitwiseandrea@gmail.com">bitwiseandrea@gmail.com</a></p>
+
+      <hr />
+      <p class="footer">
+        Stickers from Roblox is not affiliated with, endorsed by, or
+        sponsored by Roblox Corporation. &ldquo;Roblox&rdquo; is a
+        trademark of Roblox Corporation.
+      </p>
+    </main>
+  </body>
+</html>

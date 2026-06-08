@@ -33,6 +33,8 @@ export default defineConfig({
         'projects-super-chess': resolve(__dirname, 'projects/super-chess/index.html'),
         'projects-morph-your-head': resolve(__dirname, 'projects/morph-your-head/index.html'),
         'projects-working-with-coding-agents': resolve(__dirname, 'projects/working-with-coding-agents/index.html'),
+        'projects-privacy': resolve(__dirname, 'projects/privacy/index.html'),
+        'projects-terms': resolve(__dirname, 'projects/terms/index.html'),
       },
     },
   },
