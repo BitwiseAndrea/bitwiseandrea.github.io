@@ -7,7 +7,7 @@ import { resolve } from 'node:path';
 // Multi-page setup:
 //   /                                      -> index.html                                       (the painterly home)
 //   /projects/super-chess/                 -> projects/super-chess/index.html                  (short landing)
-//   /projects/morph-your-head/             -> projects/morph-your-head/index.html              (long-form landing)
+//   /projects/stickers-from-roblox/        -> projects/stickers-from-roblox/index.html         (long-form landing)
 //   /projects/working-with-coding-agents/  -> projects/working-with-coding-agents/index.html   (short opinion piece)
 //
 // Every project landing — short, long-form, or opinion-piece — shares
@@ -31,7 +31,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         'projects-super-chess': resolve(__dirname, 'projects/super-chess/index.html'),
-        'projects-morph-your-head': resolve(__dirname, 'projects/morph-your-head/index.html'),
+        'projects-stickers-from-roblox': resolve(__dirname, 'projects/stickers-from-roblox/index.html'),
         'projects-working-with-coding-agents': resolve(__dirname, 'projects/working-with-coding-agents/index.html'),
         'projects-privacy': resolve(__dirname, 'projects/privacy/index.html'),
         'projects-terms': resolve(__dirname, 'projects/terms/index.html'),

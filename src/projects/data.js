@@ -11,7 +11,7 @@
 //   * Long-form write-up — uses `content: ContentBlock[]` for the body. When
 //     `content` is present, ProjectLanding switches to the typed-block
 //     renderer (headings, callouts, code blocks, galleries, etc.) instead of
-//     paragraph + screenshot-grid. See Mario Face Stretch below.
+//     paragraph + screenshot-grid. See Stickers from Roblox below.
 //
 // To add a new project:
 //   1. Add an entry here.
@@ -19,7 +19,7 @@
 //      <title>, data-project-slug, and meta tags.
 //   3. Add a `projects-<slug>` input in vite.config.js.
 
-const MORPH_SHOTS = '/projects/morph-your-head/screenshots';
+const STICKERS_SHOTS = '/projects/stickers-from-roblox/screenshots';
 
 export const PROJECTS = [
   // ---------------------------------------------------------------------------
@@ -539,17 +539,17 @@ perft(3) -> 8902
   },
 
   // ---------------------------------------------------------------------------
-  // Mario Face Stretch — long-form write-up
+  // Stickers from Roblox — long-form write-up
   // ---------------------------------------------------------------------------
   {
-    slug: 'morph-your-head',
-    kicker: 'Roblox · 2026',
-    title: 'Morph Your Head',
+    slug: 'stickers-from-roblox',
+    kicker: 'Roblox + iOS · 2026',
+    title: 'Stickers from Roblox',
     tagline:
-      "Recreating the Super Mario 64 start-screen face on a Roblox avatar using the facial expression APIs and WrapDeformer. What worked in Studio, what didn't survive publishing, and one open platform question I'm still chewing on.",
+      "An iMessage sticker app for your Roblox avatar expressions. Capture an expression inside the companion Roblox experience, sign in with your Roblox account on iPhone, and the stickers show up natively in iMessage. This page is the build journey — from a one-day Mario-64 face experiment in Studio to an iOS companion app.",
     palette: 'dusk',
-    href: '/projects/morph-your-head/',
-    githubUrl: 'https://github.com/BitwiseAndrea/mario-face-stretch',
+    href: '/projects/stickers-from-roblox/',
+    githubUrl: null,
     demoUrl: null,
     highlights: [
       { label: 'Started', value: 'Jun 1, 2026' },
@@ -568,8 +568,18 @@ perft(3) -> 8902
     ],
     content: [
       {
+        type: 'callout',
+        variant: 'aside',
+        title: 'Where this ended up',
+        body: [
+          "This started as **Morph Your Head** — a one-day experiment recreating the Super Mario 64 floating-head start screen on a Roblox avatar. The Studio side worked. Shipping it publicly hit three platform walls (which are basically what the rest of this post is about).",
+          "A week later it became **Stickers from Roblox**: an iMessage companion app for iPhone. You capture an avatar expression inside the Roblox experience, sign in with your Roblox account on the phone, and the stickers show up natively in iMessage — drag any one into a conversation the same way iOS treats Memoji.",
+          "The rest of this page is the original build journal, kept verbatim because the platform gaps it documents are exactly why the project became a sticker app instead of a Roblox-native feature.",
+        ],
+      },
+      {
         type: 'image',
-        src: `${MORPH_SHOTS}/00-mario-64-press-start.png`,
+        src: `${STICKERS_SHOTS}/00-mario-64-press-start.png`,
         alt: 'Super Mario 64 PRESS START screen with the floating, stretchable Mario head',
         caption: 'The thing I wanted to make. Image: Super Mario 64 start screen.',
       },
@@ -652,7 +662,7 @@ perft(3) -> 8902
       },
       {
         type: 'image',
-        src: `${MORPH_SHOTS}/01-traffic-cone.png`,
+        src: `${STICKERS_SHOTS}/01-traffic-cone.png`,
         alt: 'First attempt at deforming the head — sharp, pointy, looks like a rendering bug',
         caption: 'First-attempt deformation. All knife-edges, no putty.',
       },
@@ -756,7 +766,7 @@ local DocsMoods = {
       },
       {
         type: 'image',
-        src: `${MORPH_SHOTS}/02-emoji-palette.png`,
+        src: `${STICKERS_SHOTS}/02-emoji-palette.png`,
         alt: 'Apple emoji palette — the target list for the mood library',
         caption: 'The actual target list. One mood per emoji where possible.',
       },
@@ -1004,7 +1014,7 @@ end
       },
       {
         type: 'image',
-        src: `${MORPH_SHOTS}/03-iris-debug-panel.png`,
+        src: `${STICKERS_SHOTS}/03-iris-debug-panel.png`,
         alt: 'Iris debug panel — emoji buttons per mood and raw FACS sliders',
         caption: 'Player-facing input is chat commands. Dev-facing input is this Iris panel.',
       },
@@ -1050,12 +1060,12 @@ end
         type: 'gallery',
         columns: 3,
         shots: [
-          { src: `${MORPH_SHOTS}/04-smile-01-slight.png`, alt: 'Slight smile', caption: '🙂 SlightSmile' },
-          { src: `${MORPH_SHOTS}/04-smile-02-smile.png`,  alt: 'Smile',        caption: '☺️ Smile' },
-          { src: `${MORPH_SHOTS}/04-smile-03-warm.png`,   alt: 'Warm smile',   caption: '😊 WarmSmile' },
-          { src: `${MORPH_SHOTS}/04-smile-04-grin.png`,   alt: 'Grin',         caption: '😀 Grin' },
-          { src: `${MORPH_SHOTS}/04-smile-05-warm-grin.png`, alt: 'Warm grin', caption: '😄 WarmGrin' },
-          { src: `${MORPH_SHOTS}/04-smile-06-hard-laugh.png`, alt: 'Hard laugh', caption: '😆 HardLaugh' },
+          { src: `${STICKERS_SHOTS}/04-smile-01-slight.png`, alt: 'Slight smile', caption: '🙂 SlightSmile' },
+          { src: `${STICKERS_SHOTS}/04-smile-02-smile.png`,  alt: 'Smile',        caption: '☺️ Smile' },
+          { src: `${STICKERS_SHOTS}/04-smile-03-warm.png`,   alt: 'Warm smile',   caption: '😊 WarmSmile' },
+          { src: `${STICKERS_SHOTS}/04-smile-04-grin.png`,   alt: 'Grin',         caption: '😀 Grin' },
+          { src: `${STICKERS_SHOTS}/04-smile-05-warm-grin.png`, alt: 'Warm grin', caption: '😄 WarmGrin' },
+          { src: `${STICKERS_SHOTS}/04-smile-06-hard-laugh.png`, alt: 'Hard laugh', caption: '😆 HardLaugh' },
         ],
       },
       {
@@ -1213,7 +1223,7 @@ end`,
       },
       {
         type: 'image',
-        src: `${MORPH_SHOTS}/05-funky-black-stuff.png`,
+        src: `${STICKERS_SHOTS}/05-funky-black-stuff.png`,
         alt: 'Funky black voids around the mouth when the head is stretched far',
         caption: 'Internal mouth geometry poking through the skin. Known limitation. Moving on.',
       },
@@ -1430,9 +1440,9 @@ MoodAssetIds.Ids = {
       {
         type: 'list',
         items: [
-          'The repo: [github.com/BitwiseAndrea/mario-face-stretch](https://github.com/BitwiseAndrea/mario-face-stretch)',
           'The Moods library specifically: `src/ServerScriptService/MoodChat/Moods.lua` — single file, no deps, steal it.',
           'Chat commands: `/smile`, `/wink`, `/explode`, `/cry`, `/bawl`, `/face smile winkleft`, `/faceoff`, `/reset`.',
+          'The iMessage companion app is **Stickers from Roblox** (this page). iOS source isn\'t public yet; ping me if you want to poke at it.',
         ],
       },
       {
@@ -1511,7 +1521,7 @@ MoodAssetIds.Ids = {
   // ---------------------------------------------------------------------------
   // Working with coding agents — short opinion piece
   // ---------------------------------------------------------------------------
-  // This was originally an inline callout inside the Morph Your Head post.
+  // This was originally an inline callout inside the Stickers from Roblox post.
   // Pulled out into its own document so it can be referenced from other
   // project landings (or anywhere else) without re-litigating the AI question
   // in every post.

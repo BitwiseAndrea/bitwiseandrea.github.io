@@ -9,7 +9,7 @@
 //   1. Short landing (e.g. Super Chess) — uses `tagline`, `highlights`,
 //      `body: string[]` (plain paragraphs), `stack`, `screenshots`.
 //
-//   2. Long-form write-up (e.g. Mario Face Stretch) — uses `tagline`,
+//   2. Long-form write-up (e.g. Stickers from Roblox) — uses `tagline`,
 //      `highlights`, `stack`, AND `content: ContentBlock[]` for the body.
 //      When `content` is present, the typed-block renderer takes over; the
 //      old paragraph + screenshot-grid pair is skipped.
