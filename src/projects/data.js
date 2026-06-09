@@ -546,7 +546,7 @@ perft(3) -> 8902
     kicker: 'Roblox + iOS · 2026',
     title: 'Stickers from Roblox',
     tagline:
-      "An iMessage sticker app for your Roblox avatar expressions. Capture an expression inside the companion Roblox experience, sign in with your Roblox account on iPhone, and the stickers show up natively in iMessage. This page is the build journey — from a one-day Mario-64 face experiment in Studio to an iOS companion app.",
+      "An iMessage sticker app for your Roblox avatar expressions. Capture an expression inside the companion Roblox experience, sign in with your Roblox account on iPhone, and the stickers show up natively in iMessage. This page is the build journey — from a one-day facial animation experiment in Studio to an iOS companion app.",
     palette: 'dusk',
     href: '/projects/stickers-from-roblox/',
     githubUrl: null,
@@ -659,12 +659,6 @@ perft(3) -> 8902
         type: 'paragraph',
         text:
           "And then there it was: my Roblox avatar, deformable. It didn't really look like a traffic cone — it looked more like one of those strange indie games with a rendering bug.",
-      },
-      {
-        type: 'image',
-        src: `${STICKERS_SHOTS}/01-traffic-cone.png`,
-        alt: 'First attempt at deforming the head — sharp, pointy, looks like a rendering bug',
-        caption: 'First-attempt deformation. All knife-edges, no putty.',
       },
 
       { type: 'rule' },
@@ -1012,12 +1006,6 @@ end
         text:
           "I also wanted to see the emoji *view* somewhere — and emojis don't render in Roblox text chat (various reasons). So for the dev-side I pulled in [Iris](https://github.com/SirMallard/Iris), an immediate-mode UI library for Roblox modeled on Dear ImGui. I've used it on a couple of projects. It makes the default things — sliders, buttons, toggles, windows — fast to write and visually consistent.",
       },
-      {
-        type: 'image',
-        src: `${STICKERS_SHOTS}/03-iris-debug-panel.png`,
-        alt: 'Iris debug panel — emoji buttons per mood and raw FACS sliders',
-        caption: 'Player-facing input is chat commands. Dev-facing input is this Iris panel.',
-      },
       { type: 'heading', level: 3, text: 'And then I actually looked at the faces' },
       {
         type: 'paragraph',
@@ -1060,7 +1048,7 @@ end
         type: 'gallery',
         columns: 3,
         shots: [
-          { src: `${STICKERS_SHOTS}/04-smile-01-slight.png`, alt: 'Slight smile', caption: '🙂 SlightSmile' },
+          { src: `${STICKERS_SHOTS}/04-smile-01-slight.png`, alt: 'Smirk',        caption: '😏 Smirk' },
           { src: `${STICKERS_SHOTS}/04-smile-02-smile.png`,  alt: 'Smile',        caption: '☺️ Smile' },
           { src: `${STICKERS_SHOTS}/04-smile-03-warm.png`,   alt: 'Warm smile',   caption: '😊 WarmSmile' },
           { src: `${STICKERS_SHOTS}/04-smile-04-grin.png`,   alt: 'Grin',         caption: '😀 Grin' },
