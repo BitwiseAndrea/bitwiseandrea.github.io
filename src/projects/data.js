@@ -550,7 +550,8 @@ perft(3) -> 8902
     palette: 'dusk',
     href: '/projects/stickers-from-roblox/',
     githubUrl: null,
-    demoUrl: null,
+    demoUrl: 'https://stickers.bitwiseandrea.com/signin?return_to=%2Fmy-packs%2F',
+    demoLabel: 'View your sticker packs',
     highlights: [
       { label: 'Started', value: 'Jun 1, 2026' },
       { label: 'Shipped to Studio', value: 'Same day' },

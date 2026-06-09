@@ -22,7 +22,8 @@
 //   project = {
 //     slug, kicker, title, tagline,
 //     palette,                // 'dusk' | 'noon' | 'garden' | 'night'
-//     demoUrl, githubUrl,
+//     demoUrl, demoLabel?,    // demoLabel overrides the default 'Open the demo' CTA text
+//     githubUrl,
 //     stack:        [string],
 //     highlights:   [{ label, value }],
 //     // --- short shape ---
@@ -180,7 +181,7 @@ export default function ProjectLanding({ project }) {
                 rel="noreferrer"
                 data-magnetic
               >
-                Open the demo
+                {project.demoLabel ?? 'Open the demo'}
                 <span aria-hidden="true">→</span>
               </a>
             ) : null}
