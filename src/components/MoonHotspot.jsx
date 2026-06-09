@@ -31,22 +31,31 @@ export default function MoonHotspot({ onClick, frozen = false }) {
 
     const apply = ({ plan }) => {
       const viewportMin = Math.min(window.innerWidth, window.innerHeight);
-      let size;
+      // Fixed reference box; we use translate + scale to position and
+      // resize. This matches CelestialLayer so both elements glide with
+      // an identical compositor-only transform animation when the
+      // constellation overlay opens/closes.
+      const refSize = viewportMin;
+
       let cx;
       let cy;
+      let scale;
       if (frozenRef.current) {
-        size = viewportMin * CENTERED_MOON_VMIN;
         cx = window.innerWidth / 2;
         cy = window.innerHeight / 2;
+        scale = CENTERED_MOON_VMIN;
       } else {
-        size = plan.sunSize * viewportMin;
         cx = plan.sunX * window.innerWidth;
         cy = plan.sunY * window.innerHeight;
+        scale = plan.sunSize;
       }
-      el.style.width = `${size}px`;
-      el.style.height = `${size}px`;
-      el.style.left = `${cx - size / 2}px`;
-      el.style.top = `${cy - size / 2}px`;
+
+      el.style.width = `${refSize}px`;
+      el.style.height = `${refSize}px`;
+      el.style.left = '0px';
+      el.style.top = '0px';
+      el.style.transform = `translate3d(${cx - refSize / 2}px, ${cy - refSize / 2}px, 0) scale(${scale})`;
+
       // Active either when the moon is on-screen as a moon (scroll path) OR
       // any time the constellation overlay is open (so the hotspot can
       // double as the close button).
@@ -65,48 +74,36 @@ export default function MoonHotspot({ onClick, frozen = false }) {
     };
   }, []);
 
-  // Re-position when frozen toggles, animating from the previous spot to
-  // the new one with the same WAAPI approach as CelestialLayer. This keeps
-  // the hotspot perfectly aligned with the moon disc throughout the
+  // Re-position when frozen toggles, animating from the previous transform
+  // to the new one with the same WAAPI approach as CelestialLayer. This
+  // keeps the hotspot perfectly aligned with the moon disc throughout the
   // open/close transition.
   useEffect(() => {
     const el = ref.current;
     if (!el) return undefined;
 
-    const fromLeft = el.style.left;
-    const fromTop = el.style.top;
-    const fromWidth = el.style.width;
-    const fromHeight = el.style.height;
+    const fromTransform = el.style.transform;
 
     frozenRef.current = frozen;
     if (applyRef.current) applyRef.current();
 
-    const toLeft = el.style.left;
-    const toTop = el.style.top;
-    const toWidth = el.style.width;
-    const toHeight = el.style.height;
+    const toTransform = el.style.transform;
 
     if (!hasMountedRef.current) {
       hasMountedRef.current = true;
       return undefined;
     }
-    if (!fromLeft) return undefined;
-    if (
-      fromLeft === toLeft
-      && fromTop === toTop
-      && fromWidth === toWidth
-      && fromHeight === toHeight
-    ) {
-      return undefined;
-    }
+    if (!fromTransform) return undefined;
+    if (fromTransform === toTransform) return undefined;
 
     if (animRef.current) animRef.current.cancel();
     const anim = el.animate(
       [
-        { left: fromLeft, top: fromTop, width: fromWidth, height: fromHeight },
-        { left: toLeft, top: toTop, width: toWidth, height: toHeight },
+        { transform: fromTransform },
+        { transform: toTransform },
       ],
-      { duration: 900, easing: 'cubic-bezier(.22, .9, .26, 1)' },
+      // Match CelestialLayer exactly so the click target rides with the disc.
+      { duration: 800, easing: 'cubic-bezier(.4, 0, .2, 1)' },
     );
     animRef.current = anim;
     anim.onfinish = () => {

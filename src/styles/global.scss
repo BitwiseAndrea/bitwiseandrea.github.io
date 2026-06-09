@@ -53,17 +53,20 @@ a { color: inherit; text-decoration: none; }
 }
 
 // z-index stack (back -> front):
-// sky(1)  celestial(2)  sun-rays(2)  mountains(3)  ocean(3.5)
+// sky(1)  sun-rays(2)  celestial(2)  mountains(3)  ocean(3.5)
 //   foreground-flora(4)  weather(5)  rain-cursor(8)  scenes(10)  nav(80)
 //   intro-curtain(120)  cursor(200)
 // The celestial body and the sun rays sit BEHIND the mountains so the sun
 // visibly rises and sets behind them along the horizon, and the rays look
-// like they're shafting up from beyond the silhouette. The ocean sits
-// just above the mountains so its waves visually replace them during the
-// Daylight scene (mountains fade with `1 - oceanAmount`).
+// like they're shafting up from beyond the silhouette. Within that pair,
+// the rays are placed earlier in the DOM so the sun's gradient disc
+// renders on top of the rays — the rays fan out from BEHIND the sun
+// rather than crossing over its face. The ocean sits just above the
+// mountains so its waves visually replace them during the Daylight
+// scene (mountains fade with `1 - oceanAmount`).
 .sky-layer            { z-index: 1; }
-.celestial-layer      { z-index: 2; }
 .sun-rays             { z-index: 2; mix-blend-mode: screen; }
+.celestial-layer      { z-index: 2; }
 .mountains-layer      { z-index: 3; }
 .ocean-layer          { z-index: 3; }
 .foreground-flora     { z-index: 4; }
@@ -132,8 +135,11 @@ a { color: inherit; text-decoration: none; }
   left: 0;
   border-radius: 50%;
   pointer-events: none;
-  will-change: transform, width, height;
-  contain: layout paint;
+  will-change: transform;
+  // No `contain: paint` here — the celestial wrap is sized to viewportMin
+  // and visually scaled via transform, which would otherwise clip the
+  // halo's `inset: -50%` extension. Layout still doesn't escape because
+  // the wrap is absolutely positioned inside `.celestial-layer`.
 }
 // The smooth glide into / out of the centered "constellation" position is
 // driven imperatively via the Web Animations API in CelestialLayer, so we
@@ -145,6 +151,7 @@ a { color: inherit; text-decoration: none; }
   border-radius: 50%;
   filter: blur(2px);
   transform-origin: center;
+  pointer-events: none;
 }
 .celestial__body {
   position: absolute;

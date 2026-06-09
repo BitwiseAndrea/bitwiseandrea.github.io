@@ -93,8 +93,12 @@ export default function App() {
   return (
     <div className={`app-root${constellationOpen ? ' constellation-open' : ''}`}>
       <SkyLayer />
-      <CelestialLayer onMoonClick={toggleConstellations} frozen={constellationOpen} />
+      {/* SunRaysLayer renders BEFORE the celestial body so when both share
+          z-index 2, the sun's gradient disc draws on top of the rays —
+          rays radiate out from behind the sun rather than crossing over
+          its face. */}
       <SunRaysLayer />
+      <CelestialLayer onMoonClick={toggleConstellations} frozen={constellationOpen} />
       <MountainsLayer />
       <OceanLayer />
       <ForegroundFloraLayer />

@@ -106,11 +106,25 @@ export default function WeatherCanvas() {
       for (let k = particles.length - 1; k >= 0; k -= 1) {
         const p = particles[k];
         updateParticle(p, dt);
-        // Alpha fades out particles whose type is no longer dominant.
+
+        // Particles whose type is NOT in the current weather window
+        // (e.g. a long-lived firefly still alive from a previous trip
+        // to the night scene) need to fade out fast — otherwise they
+        // bleed into unrelated scenes as faint flashes (most visibly,
+        // yellow firefly flicker over the garden when scrolling back
+        // up from the night). We drop their alpha to zero AND kill them
+        // outright after rendering so they don't accumulate.
+        const inCurrentSet = p.type === wTo || p.type === wFrom;
         const dominance = p.type === wTo ? blend : (p.type === wFrom ? 1 - blend : 0);
-        const visible = Math.min(1, dominance * 1.4 + 0.05);
+        const visible = inCurrentSet ? Math.min(1, dominance * 1.4 + 0.05) : 0;
         drawParticle(ctx, p, visible);
-        if (p.dead || p.y > window.innerHeight + 60 || p.x < -80 || p.x > window.innerWidth + 80) {
+        if (
+          p.dead
+          || !inCurrentSet
+          || p.y > window.innerHeight + 60
+          || p.x < -80
+          || p.x > window.innerWidth + 80
+        ) {
           particles.splice(k, 1);
           counts[p.type] = Math.max(0, (counts[p.type] || 1) - 1);
         }

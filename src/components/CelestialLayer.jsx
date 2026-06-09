@@ -47,28 +47,41 @@ export default function CelestialLayer({ onMoonClick, frozen = false }) {
     const apply = ({ plan }) => {
       const viewportMin = Math.min(window.innerWidth, window.innerHeight);
 
-      // Choose between scroll-driven position and the centered easter-egg
-      // position. Visual style (color, halo, craters) always tracks the
-      // scroll plan so the moon keeps its current "look" while it moves.
-      let size;
-      let x;
-      let y;
+      // We give the wrap a fixed reference size (viewportMin) and use
+      // `translate + scale` to handle BOTH position and visual size. This
+      // keeps the open/close animation entirely on the compositor — without
+      // it, animating width/height alongside transform forced a layout pass
+      // every frame, which manifested as visible "stopping points" while
+      // the moon glided up to the centered constellation pose.
+      const refSize = viewportMin;
+
+      let cx;
+      let cy;
+      let scale;
       if (frozenRef.current) {
-        size = viewportMin * CENTERED_MOON_VMIN;
-        x = window.innerWidth / 2 - size / 2;
-        y = window.innerHeight / 2 - size / 2;
+        cx = window.innerWidth / 2;
+        cy = window.innerHeight / 2;
+        scale = CENTERED_MOON_VMIN;
       } else {
-        size = plan.sunSize * viewportMin;
-        x = plan.sunX * window.innerWidth - size / 2;
-        y = plan.sunY * window.innerHeight - size / 2;
+        cx = plan.sunX * window.innerWidth;
+        cy = plan.sunY * window.innerHeight;
+        scale = plan.sunSize;
       }
 
-      wrap.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-      wrap.style.width = `${size}px`;
-      wrap.style.height = `${size}px`;
+      // Position the wrap with center at (cx, cy). Because the box is
+      // sized to refSize and scaled around its own center (transform-origin
+      // is the default 50% 50%), the visible disc is `refSize * scale` wide
+      // and centered on (cx, cy).
+      wrap.style.width = `${refSize}px`;
+      wrap.style.height = `${refSize}px`;
+      wrap.style.transform = `translate3d(${cx - refSize / 2}px, ${cy - refSize / 2}px, 0) scale(${scale})`;
 
       body.style.background = `radial-gradient(circle at 36% 36%, ${tint(plan.sunColor, 8)} 0%, ${plan.sunColor} 60%, ${tint(plan.sunColor, -18)} 100%)`;
-      body.style.boxShadow = `inset -${size * 0.12}px -${size * 0.08}px ${size * 0.18}px rgba(60, 50, 30, ${0.05 + plan.sunCrater * 0.32})`;
+      // Box-shadow is in the wrap's local (pre-scale) coordinate system, so
+      // we use refSize here. The whole wrap then scales uniformly around
+      // its center, taking the inset shadow with it, so the visible shadow
+      // always reads at ~12%/8%/18% of the apparent moon diameter.
+      body.style.boxShadow = `inset -${refSize * 0.12}px -${refSize * 0.08}px ${refSize * 0.18}px rgba(60, 50, 30, ${0.05 + plan.sunCrater * 0.32})`;
 
       const haloAlpha = 0.18 + plan.sunGlow * 0.55;
       halo.style.background = `radial-gradient(circle, ${withAlpha(plan.sunColor, haloAlpha)} 0%, ${withAlpha(plan.sunColor, 0)} 70%)`;
@@ -110,50 +123,49 @@ export default function CelestialLayer({ onMoonClick, frozen = false }) {
     };
   }, [onMoonClick]);
 
-  // When `frozen` toggles, snapshot the moon's current position, write the
-  // new (centered or scroll-driven) position via apply(), then run a Web
+  // When `frozen` toggles, snapshot the moon's current transform, write the
+  // new (centered or scroll-driven) transform via apply(), then run a Web
   // Animations API animation between the two snapshots. WAAPI is used here
   // instead of CSS transitions because the class-toggle + style-mutation
   // sequence wasn't reliably triggering CSS transitions across browsers.
+  //
+  // We animate ONLY `transform` (translate + scale). The wrap's `width` and
+  // `height` are now constant (set to viewportMin in apply()), so every
+  // visual change goes through the compositor. Earlier versions animated
+  // width/height alongside transform, which forced a per-frame layout pass
+  // and was visible as "stopping points" mid-glide on slower frames.
   useEffect(() => {
     const wrap = wrapRef.current;
     if (!wrap) return undefined;
 
-    // Snapshot the inline values BEFORE we change frozenRef + re-apply.
     const fromTransform = wrap.style.transform;
-    const fromWidth = wrap.style.width;
-    const fromHeight = wrap.style.height;
 
     frozenRef.current = frozen;
     if (applyRef.current) applyRef.current();
 
     const toTransform = wrap.style.transform;
-    const toWidth = wrap.style.width;
-    const toHeight = wrap.style.height;
 
     // First mount: nothing to glide from yet.
     if (!hasMountedRef.current) {
       hasMountedRef.current = true;
       return undefined;
     }
-    // No actual change (e.g. StrictMode double-invoke landing on the same
-    // frozen value, or unset inline style on first call).
+    // No previous inline transform, or no actual change.
     if (!fromTransform) return undefined;
-    if (
-      fromTransform === toTransform
-      && fromWidth === toWidth
-      && fromHeight === toHeight
-    ) {
-      return undefined;
-    }
+    if (fromTransform === toTransform) return undefined;
 
     if (animRef.current) animRef.current.cancel();
     const anim = wrap.animate(
       [
-        { transform: fromTransform, width: fromWidth, height: fromHeight },
-        { transform: toTransform, width: toWidth, height: toHeight },
+        { transform: fromTransform },
+        { transform: toTransform },
       ],
-      { duration: 900, easing: 'cubic-bezier(.22, .9, .26, 1)' },
+      // `cubic-bezier(.4, 0, .2, 1)` is the same Material-style ease-in-out
+      // used by most well-behaved UI animations: gentle accel, smooth body,
+      // gentle decel. Earlier we had a punchy ease-out (.22, .9, .26, 1)
+      // which read as a "lurch then drift" — feeling like two distinct
+      // movements rather than one continuous glide.
+      { duration: 800, easing: 'cubic-bezier(.4, 0, .2, 1)' },
     );
     animRef.current = anim;
     anim.onfinish = () => {
